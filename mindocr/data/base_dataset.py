@@ -10,22 +10,26 @@ class BaseDataset(object):
     Base dataset to parse dataset files.
 
     Args:
-        - data_dir:   
-        - label_file: 
+        - data_dir:
+        - label_file:
         - output_columns (List(str)): names of elements in the output tuple of __getitem__
     Attributes:
         data_list (List(Tuple)): source data items (e.g., containing image path and raw annotation)
     '''
-    def __init__(self, 
-                data_dir: Union[str, List[str]], 
+    def __init__(self,
+                data_dir: Union[str, List[str]],
                 label_file: Union[str, List[str]] = None,
                 output_columns: List[str] = None,
+                sample_ratio: Union[List, float] = 1.0,
                 **kwargs,
                 ):
 
         self._index = 0
-        self.data_list = [] 
-        
+        self.data_list = []
+
+        if isinstance(sample_ratio, int):
+            sample_ratio = float(sample_ratio)
+
         # check files
         if isinstance(data_dir, str):
             data_dir = [data_dir]
@@ -40,9 +44,7 @@ class BaseDataset(object):
             for f in label_file:
                 if not os.path.exists(f):
                     raise ValueError(f"{f} not existed. Please check the yaml file for both train and eval")
-        else:
-            label_file = []
-        self.label_file = label_file
+            self.label_file = label_file
 
         # must specify output column names
         self.output_columns = output_columns
@@ -59,7 +61,7 @@ class BaseDataset(object):
 
     def get_output_columns(self) -> List[str]:
         '''
-        get the column names for the output tuple of __getitem__, required for data mapping in the next step 
+        get the column names for the output tuple of __getitem__, required for data mapping in the next step
         '''
         #raise NotImplementedError
         return self.output_columns
@@ -71,7 +73,7 @@ class BaseDataset(object):
         else:
             item = self.__getitem__(self._index)
             self._index += 1
-            return item 
+            return item
 
 
     def __len__(self):
@@ -82,4 +84,4 @@ class BaseDataset(object):
         '''load image bytes (prepared for decoding) '''
         with open(img_path, 'rb') as f:
             image_bytes = f.read()
-        return  image_bytes 
+        return  image_bytes

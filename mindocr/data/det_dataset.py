@@ -13,9 +13,9 @@ __all__ = ['DetDataset', 'SynthTextDataset']
 
 class DetDataset(BaseDataset):
     """
-    General dataset for text detection 
+    General dataset for text detection
     The annotation format should follow:
-    
+
     .. code-block: none
 
         # image file name\tannotation info containing text and polygon points encoded by json.dumps
@@ -41,8 +41,8 @@ class DetDataset(BaseDataset):
         You can specify the `output_columns` arg to order the output data for dataloader.
 
     Notes:
-        1. The data file structure should be like 
-            ├── data_dir  
+        1. The data file structure should be like
+            ├── data_dir
             │     ├── 000001.jpg
             │     ├── 000002.jpg
             │     ├── {image_file_name}
@@ -57,7 +57,7 @@ class DetDataset(BaseDataset):
                  transform_pipeline: List[dict] = None,
                  output_columns: List[str] = None,
                  **kwargs):
-        super().__init__(data_dir=data_dir, label_file=label_file, output_columns=output_columns)
+        super().__init__(data_dir=data_dir, label_file=label_file, output_columns=output_columns, sample_ratio=sample_ratio)
 
         # check args
         if isinstance(sample_ratio, float):

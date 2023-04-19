@@ -10,7 +10,7 @@ from .base_dataset import BaseDataset
 __all__ = ['LMDBDataset']
 
 class LMDBDataset(BaseDataset):
-    """Data iterator for ocr datasets including ICDAR15 dataset. 
+    """Data iterator for ocr datasets including ICDAR15 dataset.
     The annotaiton format is required to aligned to paddle, which can be done using the `converter.py` script.
 
     Args:
@@ -20,16 +20,16 @@ class LMDBDataset(BaseDataset):
         transform_pipeline: list of dict, key - transform class name, value - a dict of param config.
                     e.g., [{'DecodeImage': {'img_mode': 'BGR', 'channel_first': False}}]
             -       if None, default transform pipeline for text detection will be taken.
-        output_columns (list): required, indicates the keys in data dict that are expected to output for dataloader. if None, all data keys will be used for return. 
+        output_columns (list): required, indicates the keys in data dict that are expected to output for dataloader. if None, all data keys will be used for return.
         global_config: additional info, used in data transformation, possible keys:
             - character_dict_path
-            
+
 
     Returns:
-        data (tuple): Depending on the transform pipeline, __get_item__ returns a tuple for the specified data item. 
+        data (tuple): Depending on the transform pipeline, __get_item__ returns a tuple for the specified data item.
         You can specify the `output_columns` arg to order the output data for dataloader.
 
-    Notes: 
+    Notes:
         1. Dataset file structure should follow:
             data_dir
             ├── dataset01
@@ -38,18 +38,19 @@ class LMDBDataset(BaseDataset):
             ├── dataset02
                 ├── data.mdb
                 ├── lock.mdb
-            ├── ... 
+            ├── ...
     """
-    def __init__(self, 
-            is_train: bool = True, 
-            data_dir: str = '', 
-            sample_ratio: float = 1.0, 
+    def __init__(self,
+            is_train: bool = True,
+            data_dir: str = '',
+            sample_ratio: float = 1.0,
             shuffle: bool = None,
-            transform_pipeline: List[dict] = None, 
+            transform_pipeline: List[dict] = None,
             output_columns: List[str] = None,
             #global_config: dict = None,
             **kwargs
             ):
+        super().__init__(data_dir=data_dir, output_columns=output_columns, sample_ratio=sample_ratio)
 
         self.data_dir = data_dir
         assert isinstance(shuffle, bool), f'type error of {shuffle}'
@@ -57,7 +58,7 @@ class LMDBDataset(BaseDataset):
 
         self.lmdb_sets = self.load_list_of_hierarchical_lmdb_dataset(data_dir)
         self.data_idx_order_list = self.get_dataset_idx_orders(sample_ratio, shuffle)
-        
+
         # create transform
         if transform_pipeline is not None:
             self.transforms = create_transforms(transform_pipeline) #, global_config=global_config)
@@ -76,9 +77,9 @@ class LMDBDataset(BaseDataset):
         }
         _data = run_transforms(_data, transforms=self.transforms)
         _available_keys = list(_data.keys())
-        
+
         if output_columns is None:
-            self.output_columns = _available_keys   
+            self.output_columns = _available_keys
         else:
             self.output_columns = []
             for k in output_columns:
@@ -98,11 +99,11 @@ class LMDBDataset(BaseDataset):
                 results.update(lmdb_sets)
         else:
             results = {}
-            
+
         return results
 
     def load_hierarchical_lmdb_dataset(self, data_dir, start_idx=0):
-        
+
         lmdb_sets = {}
         dataset_idx = start_idx
         for rootdir, dirs, _ in os.walk(data_dir + '/'):
@@ -134,7 +135,7 @@ class LMDBDataset(BaseDataset):
                 = list(range(tmp_sample_num))
             data_idx_order_list[beg_idx:end_idx, 1] += 1
             beg_idx = beg_idx + tmp_sample_num
-            
+
         if shuffle:
             np.random.shuffle(data_idx_order_list)
 
@@ -159,16 +160,16 @@ class LMDBDataset(BaseDataset):
         if sample_info is None:
             random_idx = np.random.randint(self.__len__())
             return self.__getitem__(random_idx)
-        
+
         data = {
             "img_lmdb": sample_info[0],
             "label": sample_info[1]
         }
-        
+
         # perform transformation on data
         data = run_transforms(data, transforms=self.transforms)
-            
-        output_tuple = tuple(data[k] for k in self.output_columns) 
+
+        output_tuple = tuple(data[k] for k in self.output_columns)
 
         return output_tuple
 
