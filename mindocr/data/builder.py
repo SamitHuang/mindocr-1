@@ -12,6 +12,7 @@ __all__ = ['build_dataset']
 
 supported_dataset_types = ['BaseDataset', 'DetDataset', 'RecDataset', 'LMDBDataset', 'SynthTextDataset']
 
+
 def build_dataset(
         dataset_config: dict,
         loader_config: dict,
@@ -98,9 +99,12 @@ def build_dataset(
     ms.dataset.config.set_prefetch_size(prefetch_size)
     ## max_rowsize: MB of shared memory between processes to copy data. Only used when python_multiprocessing is True.
     max_rowsize =  loader_config.get("max_rowsize", 64)
-    # auto tune num_workers, prefetch. (This conflicts the profiler)
-    #ms.dataset.config.set_autotune_interval(5)
-    #ms.dataset.config.set_enable_autotune(True, "./dataproc_autotune_out")
+
+    ms.dataset.config.set_enable_shared_mem(True)
+
+    batch_size = loader_config['batch_size']
+
+    print(f'==> Args set in data pipeline are: \n\tnum_parallel_workers={num_workers}\n\tprefetch_size={prefetch_size}\n\tmax_rowsize={max_rowsize}\n\tbatch_size={batch_size} ')
 
     # 1. create source dataset (GeneratorDataset)
     ## Invoke dataset class
@@ -131,7 +135,6 @@ def build_dataset(
     # 3. create loader
     # get batch of dataset by collecting batch_size consecutive data rows and apply batch operations
     num_samples = ds.get_dataset_size()
-    batch_size = loader_config['batch_size']
     print(f'INFO: num_samples: {num_samples}, batch_size: {batch_size}')
     if 'refine_batch_size' in kwargs:
         batch_size = _check_batch_size(num_samples, batch_size, refine=kwargs['refine_batch_size'])
@@ -147,7 +150,8 @@ def build_dataset(
     dataloader = ds.batch(
                     batch_size,
                     drop_remainder=drop_remainder,
-                    num_parallel_workers=min(num_workers, 2), # set small workers for lite computation. TODO: increase for batch-wise mapping
+                    #num_parallel_workers=min(num_workers, 2), # set small workers for lite computation. TODO: increase for batch-wise mapping
+                    num_parallel_workers=num_workers,
                     #input_columns=input_columns,
                     #output_columns=batch_column,
                     #per_batch_map=per_batch_map, # uncommet to use inner-batch transformation
