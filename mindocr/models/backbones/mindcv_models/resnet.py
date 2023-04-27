@@ -278,7 +278,7 @@ class ResNet(nn.Cell):
 
         return nn.SequentialCell(layers)
 
-    def forward_features(self, x: Tensor) -> Tensor:
+    def construct(self, x: Tensor) -> Tensor:
         """Network forward feature extraction."""
         x = self.conv1(x)
         x = self.bn1(x)
@@ -289,16 +289,6 @@ class ResNet(nn.Cell):
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
-        return x
-
-    def forward_head(self, x: Tensor) -> Tensor:
-        x = self.pool(x)
-        x = self.classifier(x)
-        return x
-
-    def construct(self, x: Tensor) -> Tensor:
-        x = self.forward_features(x)
-        x = self.forward_head(x)
         return x
 
 
