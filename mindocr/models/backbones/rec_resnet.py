@@ -154,7 +154,7 @@ class RecResNet(nn.Cell):
         y = self.maxpool2d_1(y)
         y = self.block_list(y)
         y = self.maxpool2d_2(y)
-        return y
+        return [y]
 
 # TODO: load pretrained weight in build_backbone or use a unify wrapper to load
 
