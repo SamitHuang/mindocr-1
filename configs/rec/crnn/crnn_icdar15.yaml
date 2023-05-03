@@ -27,6 +27,7 @@ model:
   head:
     name: CTCHead 
     out_channels: *num_classes 
+  pretrained_path: /Users/Samit/.mindspore/models/crnn_vgg7-ea7e996c.ckpt
 
 postprocess:
   name: RecCTCLabelDecode

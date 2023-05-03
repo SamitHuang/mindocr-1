@@ -87,7 +87,8 @@ def main(cfg):
             )
 
     # create model
-    network = build_model(cfg.model)
+    pretrained_path = cfg.model.get('pretrained_path', None)
+    network = build_model(cfg.model, ckpt_load_path=pretrained_path)
     ms.amp.auto_mixed_precision(network, amp_level=cfg.system.amp_level)
 
     # create loss

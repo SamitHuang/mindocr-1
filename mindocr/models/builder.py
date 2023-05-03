@@ -1,6 +1,7 @@
 '''
 build models
 '''
+import os
 from typing import Union
 from mindspore import load_checkpoint, load_param_into_net
 from ._registry import model_entrypoint, list_models, is_model
@@ -47,6 +48,8 @@ def build_model(name_or_config: Union[str, dict], **kwargs):
             raise ValueError(f'Invalid model name: {model_name}. Supported models are {list_models()}')
 
     elif isinstance(name_or_config, dict):
+        #config_dict = name_or_config
+        #pretrained_ckpt_path = config_dict.pop('pretrained_ckpt_path', None)
         # build model by given architecture config dict
         network = BaseModel(name_or_config)
     else:
@@ -55,9 +58,10 @@ def build_model(name_or_config: Union[str, dict], **kwargs):
     # load checkpoint
     if 'ckpt_load_path' in kwargs:
         ckpt_path = kwargs['ckpt_load_path']
-        assert ckpt_path not in ['', None], f'Please provide the correct \n`eval:\n\tckpt_load_path`\n in the yaml config file '
-        print(f'INFO: Loading checkpoint from {ckpt_path}')
-        params = load_checkpoint(ckpt_path)
-        load_param_into_net(network, params)
+        if ckpt_path is not None:
+            assert os.path.exists(ckpt_path), f'Failed to load checkpoint. {ckpt_path} NOT exist. \n Please check the path and set it in `eval-ckpt_load_path` or `model-pretrained_path` in the yaml config file '
+            params = load_checkpoint(ckpt_path)
+            load_param_into_net(network, params)
+            print(f'INFO: Loaded checkpoint from {ckpt_path}')
 
     return network
