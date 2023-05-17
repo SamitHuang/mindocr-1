@@ -6,7 +6,7 @@ import cv2
 import math
 import numpy as np
 
-__all__ = ['RecCTCLabelEncode', 'RecAttnLabelEncode', 'RecResizeImg']
+__all__ = ['RecCTCLabelEncode', 'RecAttnLabelEncode', 'RecResizeImg', 'RecResizeForInfer']
 
 
 class RecCTCLabelEncode(object):
@@ -86,7 +86,7 @@ class RecCTCLabelEncode(object):
             text_seq-> (np.ndarray, int32), sequence of character indices after  padding to max_text_len in shape (sequence_len), where ood characters are skipped
         added keys:
             length -> (np.int32) the number of valid chars in the encoded char index sequence,  where valid means the char is in dictionary.
-            text_padded -> (str) text label padded to fixed length, to solved the dynamic shape issue in dataloader. 
+            text_padded -> (str) text label padded to fixed length, to solved the dynamic shape issue in dataloader.
             text_length -> int, the length of original text string label
 
         '''
@@ -100,15 +100,15 @@ class RecCTCLabelEncode(object):
         char_indices = char_indices + [self.blank_idx] * (self.max_text_len - len(char_indices))
         # TODO: raname to char_indices
         data['text_seq'] = np.array(char_indices, dtype=np.int32)
-        # 
-        data['text_length'] = len(data['label']) 
+        #
+        data['text_length'] = len(data['label'])
         data['text_padded'] = data['label'] + ' ' * (self.max_text_len - len(data['label']))
 
         return data
 
 
 class RecAttnLabelEncode:
-    def __init__(self, 
+    def __init__(self,
                  max_text_len: int = 25,
                  character_dict_path: Optional[str] = None,
                  use_space_char: bool = False,
@@ -177,10 +177,10 @@ class RecAttnLabelEncode:
         char_indices = [self.go_idx] + char_indices + [self.stop_idx] + [self.go_idx] * (self.max_text_len - len(char_indices))
         data['text_seq'] = np.array(char_indices, dtype=np.int32)
 
-        data['text_length'] = len(data['label']) 
+        data['text_length'] = len(data['label'])
         data['text_padded'] = data['label'] + ' ' * (self.max_text_len - len(data['label']))
         return data
-    
+
 
 def str2idx(text: str, label_dict: Dict[str, int], max_text_len: int = 23, lower: bool = False) -> List[int]:
     '''
@@ -311,6 +311,46 @@ class RecResizeImg(object):
                                                     self.padding)
         data['image'] = norm_img
         data['valid_ratio'] = valid_ratio
+        return data
+
+
+class RecResizeForInfer(object):
+    def __init__(self, target_height=32, target_width=None, keep_ratio=True, padding=False, max_wh_ratio=15, interpolation=cv2.INTER_LINEAR):
+        self.keep_ratio = keep_ratio
+        self.padding = padding
+        self.max_wh_ratio = max_wh_ratio
+        #self.targt_shape = target_shape
+        self.tar_h = target_height
+        self.tar_w = target_width
+        self.interpolation = interpolation
+
+    def __call__(self, data):
+        '''
+        data: image in shape [h, w, c]
+        '''
+        img = data['image']
+        h, w = img.shape[:2]
+        #tar_h, tar_w = self.targt_shape
+        resize_h = self.tar_h
+
+        if self.keep_ratio==False:
+            assert self.tar_w is not None, 'Must specify target_width if keep_ratio is False'
+            resize_w = self.tar_w #if self.tar_w is not None else resized_h * self.max_wh_ratio
+        else:
+            wh_ratio = w / float(h)
+            resize_w = min(wh_ratio, self.max_wh_ratio) * self.tar_h
+            resize_w = math.ceil(resize_w)
+
+        resized_img = cv2.resize(img, (resize_w, resize_h), interpolation=self.interpolation)
+
+        data['shape'] = [h, w, resize_h / h, resize_w / w] # TODO: reformat, currently align to det
+        if self.padding and self.keep_ratio:
+            padded_img = np.zeros((self.tar_h, self.tar_w, 3), dtype=np.uint8)
+            padded_img[:, :resize_w, :] = resized_img
+            data['image'] = padded_img
+        else:
+            data['image'] = resized_img
+
         return data
 
 

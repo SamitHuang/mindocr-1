@@ -3,6 +3,7 @@ transforms for text detection tasks.
 """
 import warnings
 from typing import List
+import math
 
 import json
 import cv2
@@ -10,7 +11,7 @@ import pyclipper
 from shapely.geometry import Polygon
 import numpy as np
 
-__all__ = ['DetLabelEncode', 'BorderMap', 'ShrinkBinaryMap', 'expand_poly']
+__all__ = ['DetLabelEncode', 'BorderMap', 'ShrinkBinaryMap', 'DetResizeForInfer', 'expand_poly']
 
 
 class DetLabelEncode:
@@ -176,6 +177,120 @@ class ShrinkBinaryMap:
 
         data['binary_map'] = np.expand_dims(gt, axis=0)
         data['mask'] = mask
+        return data
+
+
+class DetResizeForInfer(object):
+    """
+    Resize the image and text polygons (if have).
+
+    Args:
+        target_size: target size [H, W] of the output image.
+        keep_ratio: whether keep aspect ratio in resize
+        target_limit_side: target limit side. Only use if `keep_ratio` is True and `limit_type` is min or max.
+        limit_type: method to resize the image under keep_ratio restriction. Option: min, max, auto. Default is min.
+            - min: the short side of the resized image will be scaled to `target_limit_side` as a minimum, e.g. 736. The other side will be scaled with the same ratio.
+            - max: the long side of the resized image will be at most target_limit_side, e.g, 1280. The other side will be scaled with the same ratio.
+            - auto: scale the image until it fits in the `target_size` at most, which is the same as the resize method in ScalePadImage
+        padding: whether pad the image to the target_size after resizing with aspect ratio unchanged. Only use when keep_ratio is True.
+        force_divisable: whether adjust the image size to make it divisable by `divisor` after resizing, which can be required by the network.
+                If True, padding will be invalid and canceled out.
+        divisor: divisor used used when `force_divisable` is True
+        interpoloation: interpolation method
+
+    Note:
+        1. if target_size set, keep_ratio=True, limit_type=auto, padding=True, this transform works the same as ScalePadImage,
+            which is recommended for training in graph mode for consistent batch shape.
+        2. The default choices limit_type=min, target_limit_side set, padding=False are recommended for inference in detection for efficiency and accuracy.
+
+    """
+    def __init__(self,
+                 target_size: list = None,
+                 keep_ratio=True,
+                 target_limit_side=736,
+                 limit_type='min',
+                 padding=False,
+                 force_divisable = True,
+                 divisor = 32,
+                 #scale_by_long_side=True,
+                 interpolation=cv2.INTER_LINEAR):
+
+        self.target_size = target_size
+        self.keep_ratio = keep_ratio
+        self.padding = padding
+        self.target_limit_side = target_limit_side
+        self.limit_type = limit_type
+        #self.scale_by_long_side = scale_by_long_side
+        self.interpolation = interpolation
+        self.force_divisable = force_divisable
+        self.divisor = divisor
+
+        if (not keep_ratio) or (keep_ratio and limit_type=='auto'):
+            assert target_size is not None, f'target_size must be set if aspect ratio changes or limit_type is auto'
+
+    def __call__(self, data: dict):
+        """
+        required keys:
+            image: shape HWC
+            polys: shape [num_polys, num_points, 2] (optional)
+        modified keys:
+            image
+            (polys)
+        added keys:
+            shape: [src_h, src_w, scale_ratio_h, scale_ratio_w]
+        """
+        img = data['image']
+        h, w = img.shape[:2]
+        if self.target_size:
+            tar_h, tar_w = self.target_size
+
+        if self.keep_ratio:
+            if self.limit_type == 'min':
+                # the short side of the resized image will be at least target_limit_side, e.g. 736. The other side will be scaled with the same ratio.
+                scale_ratio = self.target_limit_side / float(min(h, w))
+            elif self.limit_type == 'max':
+                # the long side of the resized image will be at most target_limit_side, e.g, 1280. The other side will be scaled with the same ratio.
+                scale_ratio = self.target_limit_side / float(max(h, w))
+            elif self.limit_type == 'auto':
+                # scale the image until it fits in the target size at most, which is the same as the resize method in ScalePadImage
+                scale_ratio = min(tar_h / h, tar_w / w)
+            else:
+                raise ValueError(f'Unknown limit_type {self.limit_type}, supported limit type: min, max, auto')
+            resize_w = math.ceil(w * scale_ratio)
+            resize_h = math.ceil(h * scale_ratio)
+        else:
+            resize_w = tar_w
+            resize_h = tar_h
+
+        if self.force_divisable:
+            # adjust the size slightly so that both sides of the image are divisable by divisor e.g. 32, which could be required by the network
+            resize_h = max(round(resize_h / self.divisor) * self.divisor, self.divisor)
+            resize_w = max(round(resize_w / self.divisor) * self.divisor, self.divisor)
+
+        scale_h = resize_h / h
+        scale_w = resize_w / w
+
+        resized_img = cv2.resize(img, (resize_w, resize_h), interpolation=self.interpolation)
+
+        if self.padding and self.keep_ratio:
+            if not self.force_divisable:
+                if self.target_size and (tar_h >= resize_h and tar_w >= resize_w):
+                    padded_img = np.zeros((tar_h, tar_w, 3), dtype=np.uint8)
+                    padded_img[:resize_h, :resize_w, :] = resized_img
+                    data['image'] = padded_img
+                else:
+                    raise ValueError(f'`target_size` must be set to be not smaller than (resize_h, resize_w) for padding, but found {self.target_size}')
+            else:
+                raise ValueError(f'Cannot set both `padding` and `force_divisable` as True due to they can be confilicting \r\n - padding requires to resize to target size while force_divisable requires to align to fixed grid.')
+        else:
+            data['image'] = resized_img
+
+        if 'polys' in data:
+            data['polys'][:, :, 0] = data['polys'][:, :, 0] * scale_w
+            data['polys'][:, :, 1] = data['polys'][:, :, 1] * scale_h
+
+        data['shape'] = [h, w, scale_h, scale_w]
+
         return data
 
 

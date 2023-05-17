@@ -117,7 +117,7 @@ print('raw annotation: ', annot)
 
 ```python
 #img_path = '/Users/Samit/Data/datasets/ic15/det/train/ch4_training_images/img_1.jpg'
-decode_image = general_transforms.DecodeImage(img_mode='BGR')
+decode_image = general_transforms.DecodeImage(img_mode='RGB')
 
 # TODO: check the input keys and output keys for the trans. func.
 

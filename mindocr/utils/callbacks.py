@@ -139,7 +139,7 @@ class Evaluator:
                 assert ('polys' in preds) or ('polygons' in preds), 'Only support detection'
                 gt_img_polys = draw_bboxes(recover_image(img), gt[0].asnumpy())
                 pred_img_polys = draw_bboxes(recover_image(img), preds['polygons'].asnumpy())
-                show_imgs([gt_img_polys, pred_img_polys], show=False, save_path=f'results/det_vis/gt_pred_{i}.png')
+                show_imgs([gt_img_polys, pred_img_polys], is_bgr_img=True, show=False, save_path=f'results/det_vis/gt_pred_{i}.png')
 
         for m in self.metrics:
             res_dict = m.eval()
