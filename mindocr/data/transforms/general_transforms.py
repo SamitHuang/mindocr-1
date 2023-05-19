@@ -317,7 +317,7 @@ class ValidatePolygons:
     Args:
         min_area: minimum area below which newly clipped polygons considered as ignored.
     """
-    def __init__(self, min_area: float = 1.0, min_poly_points: int=4,):
+    def __init__(self, min_area: float = 1.0):
         self._min_area = min_area
         #self.fix_when_invalid = fix_when_invalid
 

@@ -315,6 +315,20 @@ class RecResizeImg(object):
 
 
 class RecResizeForInfer(object):
+    '''
+    Resize image for text recognition
+
+    Args:
+        target_height: target height after resize. Commonly, 32 for crnn, 48 for svtr. default is 32.
+        target_width: target width. Default is None so that image width is scaled to make aspect ratio unchanged.
+        keep_ratio: keep aspect ratio. If True, resize the image with ratio=target_height / input_height (certain image height is required by recognition network).
+                    If False, simply resize to targte size (`target_height`, `target_width`)
+        padding: If True, pad the resized image to the targte size with zero RGB values. only used when `keep_ratio` is True.
+        max_wh_ratio: limit the maximum image width to `max_wh_ratio*target_height` after resize, which should be set considering the max sequence length the recognition model can handle.
+
+    Notes:
+        1. The default choice (keep_ratio, not padding) is suitable for inference for better accuracy.
+    '''
     def __init__(self, target_height=32, target_width=None, keep_ratio=True, padding=False, max_wh_ratio=15, interpolation=cv2.INTER_LINEAR):
         self.keep_ratio = keep_ratio
         self.padding = padding

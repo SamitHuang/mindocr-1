@@ -11,7 +11,7 @@ import pyclipper
 from shapely.geometry import Polygon
 import numpy as np
 
-__all__ = ['DetLabelEncode', 'BorderMap', 'ShrinkBinaryMap', 'DetResizeForInfer', 'expand_poly']
+__all__ = ['DetLabelEncode', 'BorderMap', 'ShrinkBinaryMap', 'DetResize', 'expand_poly']
 
 
 class DetLabelEncode:
@@ -180,29 +180,31 @@ class ShrinkBinaryMap:
         return data
 
 
-class DetResizeForInfer(object):
+class DetResize(object):
     """
-    Resize the image and text polygons (if have).
+    Resize the image and text polygons (if have) for text detection
 
     Args:
-        target_size: target size [H, W] of the output image.
-        keep_ratio: whether keep aspect ratio in resize
-        target_limit_side: target limit side. Only use if `keep_ratio` is True and `limit_type` is min or max.
+        target_size: target size [H, W] of the output image. If None, target_limit_side
+        keep_ratio: whether to keep aspect ratio in resizing. If True, The scaling ratio will be decided by `limit_type`.
+                If False, `target_size` will be used as the resized height and width.
+        target_limit_side: target length of the shorter or longer side after resize. If `limit_type` = "min", limit the shorter side. If "max", limit the longer side.
         limit_type: method to resize the image under keep_ratio restriction. Option: min, max, auto. Default is min.
-            - min: the short side of the resized image will be scaled to `target_limit_side` as a minimum, e.g. 736. The other side will be scaled with the same ratio.
-            - max: the long side of the resized image will be at most target_limit_side, e.g, 1280. The other side will be scaled with the same ratio.
+            - min: the shorter side of the resized image will be scaled to `target_limit_side`, e.g. 736. The other side will be scaled with the same ratio.
+            - max: the longer side of the resized image will be scaled to `target_limit_side`, e.g, 960. The other side will be scaled with the same ratio.
             - auto: scale the image until it fits in the `target_size` at most, which is the same as the resize method in ScalePadImage
-        padding: whether pad the image to the target_size after resizing with aspect ratio unchanged. Only use when keep_ratio is True.
-        force_divisable: whether adjust the image size to make it divisable by `divisor` after resizing, which can be required by the network.
-                If True, padding will be invalid and canceled out.
-        divisor: divisor used used when `force_divisable` is True
+        padding: whether to pad the image to the `target_size` after "keep-ratio" resizing. Only used when keep_ratio is True. Default False.
+        force_divisable: whether to further resize the image to a size multiple of `divisor` (e.g. 32) after "keep_ratio" resizing, which could be required by some networks.
+                If `padding` is also True, `force_divisable` will not make effect. Default: True. TODO: which networks require this condition ?
+        divisor: divisor used when `force_divisable` enabled. Default is 32.
         interpoloation: interpolation method
 
     Note:
-        1. if target_size set, keep_ratio=True, limit_type=auto, padding=True, this transform works the same as ScalePadImage,
-            which is recommended for training in graph mode for consistent batch shape.
-        2. The default choices limit_type=min, target_limit_side set, padding=False are recommended for inference in detection for efficiency and accuracy.
-
+        1. The default choices limit_type=min, padding=False with large `target_limit_side` are recommended for inference in detection for better accuracy,
+            which is the equivalent to the default setting in ppocr for text-detection model evaluation.
+        2. If target_size set, keep_ratio=True, limit_type=auto, padding=True, this transform works the same as ScalePadImage,
+            which is preferred for batch train/eval/infer in graph mode for consistent batch shape.
+        3. If inference speed is the first priority to guarante, you can set limit_type=max with a small `target_limit_side` like 960.
     """
     def __init__(self,
                  target_size: list = None,
@@ -212,7 +214,6 @@ class DetResizeForInfer(object):
                  padding=False,
                  force_divisable = True,
                  divisor = 32,
-                 #scale_by_long_side=True,
                  interpolation=cv2.INTER_LINEAR):
 
         self.target_size = target_size
@@ -227,6 +228,9 @@ class DetResizeForInfer(object):
 
         if (not keep_ratio) or (keep_ratio and limit_type=='auto'):
             assert target_size is not None, f'target_size must be set if aspect ratio changes or limit_type is auto'
+
+        if keep_ratio and padding and force_divisable:
+            print(f'WARNING: `padding` and `force_divisable` are conflicting after aspect-ratio-kept resizing. `force_divisable` will not make effect.')
 
     def __call__(self, data: dict):
         """
@@ -262,7 +266,7 @@ class DetResizeForInfer(object):
             resize_w = tar_w
             resize_h = tar_h
 
-        if self.force_divisable:
+        if self.force_divisable and not self.padding:
             # adjust the size slightly so that both sides of the image are divisable by divisor e.g. 32, which could be required by the network
             resize_h = max(round(resize_h / self.divisor) * self.divisor, self.divisor)
             resize_w = max(round(resize_w / self.divisor) * self.divisor, self.divisor)
@@ -273,15 +277,12 @@ class DetResizeForInfer(object):
         resized_img = cv2.resize(img, (resize_w, resize_h), interpolation=self.interpolation)
 
         if self.padding and self.keep_ratio:
-            if not self.force_divisable:
-                if self.target_size and (tar_h >= resize_h and tar_w >= resize_w):
-                    padded_img = np.zeros((tar_h, tar_w, 3), dtype=np.uint8)
-                    padded_img[:resize_h, :resize_w, :] = resized_img
-                    data['image'] = padded_img
-                else:
-                    raise ValueError(f'`target_size` must be set to be not smaller than (resize_h, resize_w) for padding, but found {self.target_size}')
+            if self.target_size and (tar_h >= resize_h and tar_w >= resize_w):
+                padded_img = np.zeros((tar_h, tar_w, 3), dtype=np.uint8)
+                padded_img[:resize_h, :resize_w, :] = resized_img
+                data['image'] = padded_img
             else:
-                raise ValueError(f'Cannot set both `padding` and `force_divisable` as True due to they can be confilicting \r\n - padding requires to resize to target size while force_divisable requires to align to fixed grid.')
+                raise ValueError(f'`target_size` must be set to be not smaller than (resize_h, resize_w) for padding, but found {self.target_size}')
         else:
             data['image'] = resized_img
 
