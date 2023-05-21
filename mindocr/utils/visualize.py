@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from ..data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from PIL import Image, ImageDraw, ImageFont
 
-__all__ = ['show_img', 'show_imgs', 'draw_bboxes', 'recover_image']
+__all__ = ['show_img', 'show_imgs', 'draw_boxes', 'draw_texts_with_boxes', 'recover_image', 'visualize']
 
 
 def show_img(img: np.array, is_bgr_img=True, title='img', show=True, save_path=None):
@@ -20,7 +20,7 @@ def show_img(img: np.array, is_bgr_img=True, title='img', show=True, save_path=N
     if show:
         plt.show()
     if save_path is not None:
-        plt.savefig(save_path, bbox_inches='tight', dpi=300)
+        plt.savefig(save_path, bbox_inches='tight', dpi=200)
 
 
 def show_imgs(imgs: List[np.array], is_bgr_img=False,  title='img', show=True, save_path=None, mean_rgb=None, std_rgb=None, is_chw=False, figure_width=6.4):
@@ -50,7 +50,7 @@ def show_imgs(imgs: List[np.array], is_bgr_img=False,  title='img', show=True, s
         plt.savefig(save_path, bbox_inches='tight', dpi=300)
 
 
-def draw_bboxes(image: Union[str, np.array], bboxes: Union[list, np.array], color: Union[tuple, str]=(255, 0, 0), thickness=2, is_bgr_img=True): #, to_rgb=False):
+def draw_boxes(image: Union[str, np.array], bboxes: Union[list, np.array], color: Union[tuple, str]=(255, 0, 0), thickness=2, is_bgr_img=False): #, to_rgb=False):
     ''' image can be str or np.array for image in 'BGR' colorm mode.
     color: list for color of each box, or tuple for color of all boxes with the same color. in RGB order
 
@@ -80,7 +80,7 @@ def draw_bboxes(image: Union[str, np.array], bboxes: Union[list, np.array], colo
     return image
 
 
-def draw_bboxes_and_texts(image: Union[str, np.array],
+def draw_texts_with_boxes(image: Union[str, np.array],
                           bboxes: Union[list, np.array],
                           texts: List[str],
                           box_color: Union[tuple, str]=(255, 0, 0),
@@ -101,7 +101,7 @@ def draw_bboxes_and_texts(image: Union[str, np.array],
             image = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2RGB)
         pimg = Image.fromarray(image)
     else:
-        img_with_boxes = draw_bboxes(image, bboxes, box_color, thickness=thickness, is_bgr_img=is_bgr_img)
+        img_with_boxes = draw_boxes(image, bboxes, box_color, thickness=thickness, is_bgr_img=is_bgr_img)
         pimg = Image.fromarray(img_with_boxes)
 
     img_h, img_w = pimg.size
@@ -120,7 +120,7 @@ def draw_bboxes_and_texts(image: Union[str, np.array],
         if text_inside_box:
             draw_point_w = corner[0] + box_w*0.1
             draw_point_h = corner[1] - box_h*0.05
-            font_size = round(box_h * 0.9) if not isinstance(font_size, int) else font_size
+            font_size = round(box_h * 0.8) if not isinstance(font_size, int) else font_size
         else:
             if isinstance(font_size, int) or isinstance(font_size, float):
                 font_size = font_size
@@ -128,7 +128,7 @@ def draw_bboxes_and_texts(image: Union[str, np.array],
                 print('WARNING: font size needs to be fixed if text placed under box')
                 font_size = 20 #round(img_h * 0.05)
             draw_point_w = corner[0]
-            draw_point_h = corner[1] + font_size
+            draw_point_h = corner[1] - font_size
 
         return (draw_point_w, draw_point_h), font_size
 
@@ -142,6 +142,40 @@ def draw_bboxes_and_texts(image: Union[str, np.array],
         img_draw.text(draw_point, text, font=ttf, fill=text_color)
 
     return np.array(pimg)
+
+
+def visualize(rgb_img, boxes, texts=None, vis_font_path=None, display=True, save_path=None, draw_texts_on_blank_page=True):
+    det_vis = draw_boxes(rgb_img, boxes)
+    vis_imgs = [det_vis]
+    if texts is not None:
+        if draw_texts_on_blank_page:
+            bg = np.ones([rgb_img.shape[0], rgb_img.shape[1], 3], dtype=np.uint8) * 255
+            hide_boxes = False
+            text_inside_box = True
+            font_size = None
+            text_color = (0, 0, 0)
+        else:
+            bg = det_vis
+            hide_boxes = True
+            text_inside_box = False
+            font_size = max(int(18 * rgb_img.shape[0] / 700), 12)
+            text_color = (0, 255, 0)
+        text_vis = draw_texts_with_boxes(
+                            bg,
+                            boxes,
+                            texts,
+                            text_color=text_color,
+                            font_path=vis_font_path, #'mindocr/utils/font/simfang.ttf',
+                            font_size=font_size,
+                            hide_boxes=hide_boxes,
+                            text_inside_box=text_inside_box)
+
+        if draw_texts_on_blank_page:
+            vis_imgs = [det_vis, text_vis]
+        else:
+            vis_imgs = [text_vis]
+
+    show_imgs(vis_imgs, show=display, save_path=save_path)
 
 
 def recover_image(img, mean=IMAGENET_DEFAULT_MEAN, std=IMAGENET_DEFAULT_STD, is_chw=True, to_bgr=True):

@@ -163,9 +163,9 @@ data = decode_image(data)
 print(data['texts'])
 
 # visualize
-from mindocr.utils.visualize import draw_bboxes
+from mindocr.utils.visualize import draw_boxes
 
-res = draw_bboxes(data['image'], data['polys'])
+res = draw_boxes(data['image'], data['polys'])
 show_img(res)
 
 ```
@@ -194,7 +194,7 @@ for i in range(2):
     data_cache = copy.deepcopy(data)
     data_cropped = crop_data(data_cache)
 
-    res_crop = draw_bboxes(data_cropped['image'], data_cropped['polys'])
+    res_crop = draw_boxes(data_cropped['image'], data_cropped['polys'])
     show_img(res_crop)
 ```
 
