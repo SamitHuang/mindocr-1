@@ -107,8 +107,6 @@ web_cvpr_0	[{"transcription": "canada", "points": [[430, 148], [540, 148], [540,
 img_10_0	[{"transcription": "residential", "points": [[43, 88], [149, 78], [151, 101], [44, 111]]}, {"transcription": "areas", "points": [[152, 83], [201, 81], [202, 98], [153, 100]]}, {"transcription": "when", "points": [[36, 56], [101, 56], [101, 78], [36, 78]]}, {"transcription": "you", "points": [[99, 54], [143, 52], [144, 78], [100, 80]]}, {"transcription": "pass", "points": [[140, 54], [186, 50], [188, 74], [142, 78]]}, {"transcription": "by", "points": [[182, 52], [208, 52], [208, 75], [182, 75]]}, {"transcription": "volume", "points": [[199, 30], [254, 30], [254, 46], [199, 46]]}, {"transcription": "your", "points": [[164, 28], [203, 28], [203, 46], [164, 46]]}, {"transcription": "lower", "points": [[109, 25], [162, 25], [162, 46], [109, 46]]}, {"transcription": "please", "points": [[31, 18], [109, 20], [108, 48], [30, 46]]}]
 ```
 
-
-
 ## How to add support for a new model inference
 
 ### Preprocessing 
@@ -130,3 +128,9 @@ By default, model weights will be loaded from the provided pretrained URL define
 Similary, the postprocess pipeline for each algorithm can vary and is defined in `tools/infer/text/postprocess.py`.
 
 If you find the default postprocessing pipeline or hyper-params does not meet your need, please extend the if-else conditions or add a new key-value pair  the `optimal_hparam` dict, where key is the algorithm name and value is the hyper-param setting. 
+
+
+## Command Line Arguments 
+
+All CLI arguments definition can be viewed via `python tools/infer/text/predict_system.py -h` or reading `tools/infer/text/config.py`.    
+
