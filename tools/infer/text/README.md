@@ -25,10 +25,8 @@ As defined in `predict_det.py`, the supported detection algorithms are as follow
   | DB_MV3 | dbnet_mobilenetv3 | English |
 
 ### Demo Results
-
-
 <p align="left">
-  <img src="./ic15_test_img108_det.png" width=420 />
+  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/ce136b92-f0aa-4a05-b689-9f60d0b40db1" width=420 />
 </p>
 
 ```
@@ -36,7 +34,7 @@ img_108.jpg	[[[228.0, 440.0], [403.0, 413.0], [406.0, 433.0], [231.0, 459.0]], [
 ```
 
 <p align="left">
-  <img src="./paper_sam_det.png" width=420 />
+  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/61066d4a-5922-471e-b702-2ea79c3cc525" width=420 />
 </p>
 
 ```
@@ -73,8 +71,8 @@ Note: the above models doesn't support space char recognition.
 ### Demo Results
 
 <p align="left">
-  <img src="./word_1216.png" width=100/>
-  <img src="./word_1217.png" width=100/>
+  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/fa8c5e4e-0e05-4c93-b9a3-6e0327c1609f" width=100/>
+  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/8ec50bdf-ea6c-4bce-a799-2fdb8e9512b1" width=100/>
 </p>
 
 ```text
@@ -95,14 +93,14 @@ By default, the inference and visualization results will be saved in `./inferenc
 
 ### Demo Results
 <p align="left">
-  <img src="web_cvpr_res.png" width=420/>
+  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/c58fb182-32b0-4b73-b4fd-7ba393e3f397" width=420/>
 </p>
 
 ```text
 web_cvpr_0	[{"transcription": "canada", "points": [[430, 148], [540, 148], [540, 171], [430, 171]]}, {"transcription": "vancouver", "points": [[263, 148], [420, 148], [420, 171], [263, 171]]}, {"transcription": "cvpr", "points": [[32, 69], [251, 63], [254, 174], [35, 180]]}, {"transcription": "2023", "points": [[194, 44], [256, 45], [255, 72], [194, 70]]}, {"transcription": "june", "points": [[36, 45], [110, 44], [110, 70], [37, 71]]}, {"transcription": "1822", "points": [[114, 43], [190, 45], [190, 70], [113, 69]]}]
 ```
 <p align="left">
-  <img src="ic15_test_img10_res.png" width=420/>
+  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/c1f53970-8618-4039-994f-9f6dc1eee1dd" width=420/>
 </p>
 
 ```text
