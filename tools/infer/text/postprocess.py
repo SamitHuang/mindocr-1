@@ -16,12 +16,23 @@ class Postprocessor(object):
             else:
                 raise ValueError(f'No postprocess config defined for {algo}. Please check the algorithm name.')
         elif task=='rec':
-            if algo.startswith('CRNN') or algo.startswith('RARE'):
+            # TODO: update character_dict_path and use_space_char after CRNN trained using en_dict.txt released
+            if algo.startswith('CRNN'):
+                # TODO: allow users to input char dict path
+                dict_path = 'mindocr/utils/dict/ch_dict.txt' if algo == 'CRNN_CH' else None
                 postproc_cfg = dict(
                   name='RecCTCLabelDecode',
-                  character_dict_path=None,
+                  character_dict_path=dict_path,
                   use_space_char=False,
                 )
+            elif algo.startswith('RARE'):
+                dict_path = 'mindocr/utils/dict/ch_dict.txt' if algo == 'RARE_CH' else None
+                postproc_cfg = dict(
+                  name='RecAttnLabelDecode',
+                  character_dict_path=dict_path,
+                  use_space_char=False,
+                )
+
             else:
                 raise ValueError(f'No postprocess config defined for {algo}. Please check the algorithm name.')
 

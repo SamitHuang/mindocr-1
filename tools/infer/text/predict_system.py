@@ -105,13 +105,14 @@ class TextSystem(object):
         if do_visualize:
             vst = time()
             vis_fp = os.path.join(self.vis_dir, fn+'_res.png')
+            # TODO: improve vis for leaning texts
             visualize(data['image_ori'],
                       boxes,
                       texts=[x[0] for x in text_scores],
                       vis_font_path=self.vis_font_path,
                       display=False,
                       save_path=vis_fp,
-                      draw_texts_on_blank_page=False) # TODO: set as you want
+                      draw_texts_on_blank_page=False) # NOTE: set as you want
             time_profile['vis'] = time() - vst
         return boxes, text_scores, time_profile
 
@@ -150,8 +151,7 @@ def main():
     text_spot = TextSystem(args)
 
     # warmup
-    warmup = False
-    if warmup:
+    if args.warmup:
         for i in range(2):
             text_spot(img_paths[0], do_visualize=False)
 

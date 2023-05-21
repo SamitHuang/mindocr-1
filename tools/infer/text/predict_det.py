@@ -64,12 +64,14 @@ class TextDetector(object):
         os.makedirs(self.vis_dir, exist_ok=True)
 
         self.box_type = args.det_box_type
+        self.visualize_preprocess = False
 
     def __call__(self, img_or_path, do_visualize=True):
         '''
 		Args:
             img_or_path: str for img path or np.array for RGB image
             do_visualize: visualize preprocess and final result and save them
+
 		Return:
             det_res_final (dict): detection result with keys:
 				- polys: np.array in shape [num_polygons, 4, 2] if det_box_type is 'quad'. Otherwise, it is a list of np.array, each np.array is the polygon points.
@@ -81,9 +83,9 @@ class TextDetector(object):
 		'''
         # preprocess
         data = self.preprocess(img_or_path)
-        if do_visualize:
+        fn = os.path.basename(data.get('img_path', 'input.png')).split('.')[0]
+        if do_visualize and self.visualize_preprocess:
             #show_imgs([data['image_ori']], is_bgr_img=False, title='det: '+ data['img_path'])
-            fn = os.path.basename(data.get('img_path', 'input.png')).split('.')[0]
             # TODO: saving images increase inference time.
             show_imgs([data['image']], title=fn+'_det_preprocessed',
                       mean_rgb=IMAGENET_DEFAULT_MEAN, std_rgb=IMAGENET_DEFAULT_STD, is_chw=True,
@@ -108,7 +110,7 @@ class TextDetector(object):
 
         if do_visualize:
             det_vis = draw_boxes(data['image_ori'], det_res_final['polys'], is_bgr_img=False)
-            show_imgs([det_vis], show=False, save_path=os.path.join(self.vis_dir, fn+'_det_res.png') )
+            show_imgs([det_vis], show=False, title=fn+'_det_res', save_path=os.path.join(self.vis_dir, fn+'_det_res.png') )
 
         return det_res_final, data
 
@@ -204,6 +206,8 @@ if __name__ == '__main__':
     args = parse_args()
     save_dir = args.draw_img_save_dir
     img_paths = get_image_paths(args.image_dir)
+    # uncomment it to quick test the infer FPS
+    #img_paths = img_paths[:15]
 
     ms.set_context(mode=args.mode)
 
@@ -213,8 +217,10 @@ if __name__ == '__main__':
     # run for each image
     det_res_all = []
     for i, img_path in enumerate(img_paths):
-        det_res, _ = text_detect(img_path)
+        print(f'\nINFO: Infering [{i+1}/{len(img_paths)}]: ', img_path)
+        det_res, _ = text_detect(img_path, do_visualize=True)
         det_res_all.append(det_res)
+        print(f"INFO: Num detected text boxes: {len(det_res['polys'])}")
 
     # save all results in a txt file
     save_det_res(det_res_all, img_paths, save_path=os.path.join(save_dir, 'det_results.txt'))

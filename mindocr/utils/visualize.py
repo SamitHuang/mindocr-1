@@ -20,10 +20,10 @@ def show_img(img: np.array, is_bgr_img=True, title='img', show=True, save_path=N
     if show:
         plt.show()
     if save_path is not None:
-        plt.savefig(save_path, bbox_inches='tight', dpi=200)
+        plt.savefig(save_path)#, bbox_inches='tight', dpi=460)
 
 
-def show_imgs(imgs: List[np.array], is_bgr_img=False,  title='img', show=True, save_path=None, mean_rgb=None, std_rgb=None, is_chw=False, figure_width=6.4):
+def show_imgs(imgs: List[np.array], is_bgr_img=False,  title=None, show=True, save_path=None, mean_rgb=None, std_rgb=None, is_chw=False, figure_width=6.4):
     #if len(imgs.shape) not in [2, 4]:
     #    imgs = np.expand_dims(imgs, axis=0)
     subplot_h = 4.8 * (figure_width / 6.4)
@@ -41,7 +41,8 @@ def show_imgs(imgs: List[np.array], is_bgr_img=False,  title='img', show=True, s
             img = (img * std_rgb) + mean_rgb
             img = np.clip(img, 0, 255).astype(np.int32)
         plt.subplot(num_images, 1, i+1)
-        plt.title('{}_{}'.format(title, i))
+        if title is not None:
+            plt.title('{}_{}'.format(title, i))
         plt.imshow(img, cmap=None if color else 'gray')
     if show:
         plt.show()
@@ -84,7 +85,7 @@ def draw_texts_with_boxes(image: Union[str, np.array],
                           bboxes: Union[list, np.array],
                           texts: List[str],
                           box_color: Union[tuple, str]=(255, 0, 0),
-                          thickness=1,
+                          thickness=0.5,
                           text_color: tuple=(0, 0, 0),
                           font_path: str=None,
                           font_size: int=None,
@@ -158,8 +159,9 @@ def visualize(rgb_img, boxes, texts=None, vis_font_path=None, display=True, save
             bg = det_vis
             hide_boxes = True
             text_inside_box = False
-            font_size = max(int(18 * rgb_img.shape[0] / 700), 12)
+            font_size = max(int(18 * rgb_img.shape[0] / 700), 22)
             text_color = (0, 255, 0)
+        #print("DEBUG: font size = ", font_size)
         text_vis = draw_texts_with_boxes(
                             bg,
                             boxes,
@@ -175,7 +177,7 @@ def visualize(rgb_img, boxes, texts=None, vis_font_path=None, display=True, save
         else:
             vis_imgs = [text_vis]
 
-    show_imgs(vis_imgs, show=display, save_path=save_path)
+    show_imgs(vis_imgs, show=display, title=None, save_path=save_path)
 
 
 def recover_image(img, mean=IMAGENET_DEFAULT_MEAN, std=IMAGENET_DEFAULT_STD, is_chw=True, to_bgr=True):
