@@ -154,7 +154,7 @@ class TextRecognizer(object):
         data = self.preprocess(img_or_path)
 
         ## visualize preprocess result
-        if visualize:
+        if do_visualize:
             #show_imgs([data['image_ori']], is_bgr_img=False, title=f'origin_{i}')
             fn = os.path.basename(data.get('img_path', f'crop_{crop_idx}.png')).split('.')[0]
             show_imgs([data['image']], title=fn+'_rec_preprocessed', mean_rgb=[127.0, 127.0, 127.0], std_rgb=[127.0, 127.0, 127.0],
