@@ -74,6 +74,8 @@ English text recognition:
 
 <p align="left">
   <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/fa8c5e4e-0e05-4c93-b9a3-6e0327c1609f" width=100/>
+</p>
+<p align="left">
   <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/8ec50bdf-ea6c-4bce-a799-2fdb8e9512b1" width=100/>
 </p>
 
@@ -85,8 +87,10 @@ word_1217.png   club
 Chinese text recognition:
 
 <p align="left">
-  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/a1f3bec1-06d3-48c2-b75e-dd75164a2681" width=200/>
-  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/5ff20be4-9abd-43b4-b14c-84b8b07f934a" width=200/>
+  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/e220ade5-89ae-47a4-927f-2c28941a5965" width=120/>
+</p>
+<p align="left">
+  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/d7cfee90-d586-4796-9ebf-b56872832e71" width=240/>
 </p>
 
 ```text
