@@ -119,7 +119,7 @@ class TextSystem(object):
 def save_res(boxes_all, text_scores_all, img_paths, save_path="system_results.txt"):
     lines = []
     for i, img_path in enumerate(img_paths):
-        fn = os.path.basename(img_path).split('.')[0]
+        #fn = os.path.basename(img_path).split('.')[0]
         boxes = boxes_all[i]
         text_scores = text_scores_all[i]
 
@@ -129,7 +129,7 @@ def save_res(boxes_all, text_scores_all, img_paths, save_path="system_results.tx
                     "points": np.array(boxes[j]).astype(np.int32).tolist(),
                 })
 
-        img_res_str = fn + '_' + str(i) + "\t" + json.dumps(res, ensure_ascii=False) + "\n"
+        img_res_str = os.path.basename(img_path) +  "\t" + json.dumps(res, ensure_ascii=False) + "\n"
         lines.append(img_res_str)
 
     with open(save_path, 'w') as f:
@@ -142,6 +142,7 @@ def main():
     args = parse_args()
     save_dir = args.draw_img_save_dir
     img_paths = get_image_paths(args.image_dir)
+
     # uncomment it to quick test the infer FPS
     #img_paths = img_paths[:10]
 

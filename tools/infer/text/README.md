@@ -1,5 +1,15 @@
 # MindOCR Online Inference
 
+## Dependency
+
+| Environment | Version |
+|-------------|---------|
+| MindSpore   | >=1.9   |
+| Python      | >=3.7   |
+
+Supported platforms: Linux, MacOS, Windows (Not tested) 
+Supported devices: CPU, GPU, and Ascend
+
 ## Text Detection
 
 To run text detection on an input image or multiple images in a directory, please run:
@@ -124,6 +134,28 @@ web_cvpr_0	[{"transcription": "canada", "points": [[430, 148], [540, 148], [540,
 ```text
 img_10_0	[{"transcription": "residential", "points": [[43, 88], [149, 78], [151, 101], [44, 111]]}, {"transcription": "areas", "points": [[152, 83], [201, 81], [202, 98], [153, 100]]}, {"transcription": "when", "points": [[36, 56], [101, 56], [101, 78], [36, 78]]}, {"transcription": "you", "points": [[99, 54], [143, 52], [144, 78], [100, 80]]}, {"transcription": "pass", "points": [[140, 54], [186, 50], [188, 74], [142, 78]]}, {"transcription": "by", "points": [[182, 52], [208, 52], [208, 75], [182, 75]]}, {"transcription": "volume", "points": [[199, 30], [254, 30], [254, 46], [199, 46]]}, {"transcription": "your", "points": [[164, 28], [203, 28], [203, 46], [164, 46]]}, {"transcription": "lower", "points": [[109, 25], [162, 25], [162, 46], [109, 46]]}, {"transcription": "please", "points": [[31, 18], [109, 20], [108, 48], [30, 46]]}]
 ```
+
+### Result Evaluation
+
+   After the prediction finishes, the results including image names, bounding boxes (`points`) and recognized texts (`transcription`) will be saved in `args.draw_img_save_dir` (`inference_results/system_results.txt` by default). The format of prediction results is shown below.
+   ```text
+   img_1.jpg	[{"transcription": "hello", "points": [600, 150, 715, 157, 714, 177, 599, 170]}, {"transcription": "world", "points": [622, 126, 695, 129, 694, 154, 621, 151]}, ...]
+   img_2.jpg	[{"transcription": "apple", "points": [553, 338, 706, 318, 709, 342, 556, 362]}, ...]
+   ...
+   ```
+   Prepare the **ground truth** file (in the same format as above) and **prediction results** file, and then run the following command to evaluate the prediction results.
+
+   ```bash
+   cd deploy/eval_utils
+   python eval_pipeline.py --gt_path path/to/gt.txt --pred_path path/to/ckpt_pred_result.txt
+   ```
+
+Here are the result evaluation for different inferene models. 
+
+| Det Algo| Rec Algo |  Dataset     | Inference acc |
+|---------|------------------|----------------------------|---------------|
+| DBNet   | CRNN             | [ICDAR15](https://rrc.cvc.uab.es/?ch=4&com=downloads)<sup>*</sup> | 55.99% | 
+
 
 ## How to add support for a new model inference
 

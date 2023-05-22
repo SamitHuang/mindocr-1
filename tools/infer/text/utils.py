@@ -18,6 +18,7 @@ def get_image_paths(img_dir):
             img_paths.extend(glob.glob(os.path.join(img_dir, f'*.{fmt}')))
             img_paths.extend(glob.glob(os.path.join(img_dir, f'*.{fmt.upper()}')))
 
+    assert len(img_paths) > 0, f'No image files found in {img_dir}. Please check the image_dir arg.'
     return sorted(img_paths)
 
 def get_ckpt_file(ckpt_dir):
