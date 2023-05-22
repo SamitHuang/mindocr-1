@@ -214,7 +214,7 @@ if __name__ == '__main__':
 
     # run for each image
     start = time()
-    rec_res_all = text_recognize(img_paths, visualize=False)
+    rec_res_all = text_recognize(img_paths, do_visualize=False)
     t = time() - start
     # save all results in a txt file
     save_fp = os.path.join(save_dir, 'rec_results.txt' if args.rec_batch_mode else 'rec_results_serial.txt')
