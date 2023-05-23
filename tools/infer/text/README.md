@@ -18,7 +18,7 @@ To run text detection on an input image or multiple images in a directory, pleas
 python tools/infer/text/predict_det.py  --image_dir {path_to_img or dir_to_imgs} --rec_algorithm DB++
 ```
 
-After running, the inference results will be saved in `{args.draw_img_save_dir}/det_results.txt`, where the `--draw_img_save_dir` arg is `inference_results` by default. Here are some example detection results.  
+After running, the inference results will be saved in `{args.draw_img_save_dir}/det_results.txt`, where the `--draw_img_save_dir` arg is `inference_results` by default. Here are some results for examples.  
 
 <p align="left">
   <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/ce136b92-f0aa-4a05-b689-9f60d0b40db1" width=420 />
@@ -37,7 +37,6 @@ paper_sam.png	[[[1161.0, 340.0], [1277.0, 340.0], [1277.0, 378.0], [1161.0, 378.
 ```
 
 **Notes:** 
-
 1. For input images with large resolution, you should set `--det_limit_side_len` larger like 1280, (default is 960). `--det_limit_type` and  
 
 2. For more argument illustrations and usage, please run `python tools/infer/text/predict_det.py -h` or view `tools/infer/text/config.py`
@@ -56,7 +55,6 @@ As defined in `predict_det.py`, the supported detection algorithms are as follow
   | DB_MV3 | dbnet_mobilenetv3 | English |
 
 
-### Some Results
 
 ## Text Recognition
 
@@ -65,29 +63,9 @@ To run text recognition on an input image or multiple images in a directory, ple
 ```shell
 python tools/infer/text/predict_rec.py  --image_dir {path_to_img or dir_to_imgs} --rec_algorithm CRNN
 ```
+After running, the inference results will be saved in `{args.draw_img_save_dir}/rec_results.txt`, where the `--draw_img_save_dir` arg is `inference_results` by default. Here are some results for examples.  
 
-For more argument illustrations and usage, please run `python tools/infer/text/predict_rec.py -h` or view `tools/infer/text/config.py`
-
-By default, the inference results will be saved in `./inference_results/rec_results.txt`, which can be changed via the `--draw_img_save_dir` argument. 
-
-Both batch-wise inference and single-mode inference are supported. 
-
-### Supported Algorithms and corresponding Networks 
-
-As defined in `predict_rec.py`, the supported recognition algorithms are as follows. 
-
-  | **Algorithm Name** | **Architecture** | **Support language** |  
-  | :------: | :------: | :------: | 
-  | CRNN | crnn_resnet34 | English | 
-  | RARE | rare_resnet34 | English |
-  | CRNN_CH | crnn_resnet34_ch | Chinese |
-  | RARE_CH | rare_resnet34_ch | Chinese |
-
-Note: the above models doesn't support space char recognition.
-
-### Some Results
-
-English text recognition:
+- English text recognition:
 
 <p align="left">
   <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/fa8c5e4e-0e05-4c93-b9a3-6e0327c1609f" width=100/>
@@ -101,7 +79,7 @@ word_1216.png   coffee
 word_1217.png   club
 ```
 
-Chinese text recognition:
+- Chinese text recognition:
 
 <p align="left">
   <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/e220ade5-89ae-47a4-927f-2c28941a5965" width=120/>
@@ -115,6 +93,23 @@ cert_id.png 公民身份号码44052419
 doc_cn3.png 马拉松选手不会为短暂的领先感到满意，而是永远在奔跑。
 ```
 
+**Notes:** 
+1. For more argument illustrations and usage, please run `python tools/infer/text/predict_rec.py -h` or view `tools/infer/text/config.py`
+2. Both batch-wise inference and single-mode inference are supported. 
+
+### Supported Algorithms and corresponding Networks 
+
+As defined in `predict_rec.py`, the supported recognition algorithms are as follows. 
+
+  | **Algorithm Name** | **Architecture** | **Support language** |  
+  | :------: | :------: | :------: | 
+  | CRNN | crnn_resnet34 | English | 
+  | RARE | rare_resnet34 | English |
+  | CRNN_CH | crnn_resnet34_ch | Chinese |
+  | RARE_CH | rare_resnet34_ch | Chinese |
+
+Note: Currently, the listed models doesn't support space char recognition (will support soon)
+
 ## Text Detection and Recognition Concatenation (End2End)
 
 To run text spoting (i.e., detect all text regions then recognize each of them) on an input image or multiple images in a directory, please run:
@@ -122,11 +117,8 @@ To run text spoting (i.e., detect all text regions then recognize each of them) 
 ```shell
 python tools/infer/text/predict_system.py --image_dir {path_to_img or dir_to_imgs} --det_algorithm DB++ --rec_algorithm CRNN
 ```
-For more argument illustrations and usage, please run `python tools/infer/text/predict_system.py -h` or view `tools/infer/text/config.py`
 
-By default, the inference and visualization results will be saved in `./inference_results/`, which is defined by the `--draw_img_save_dir` argument. 
-
-### Some Results
+After running, the inference results will be saved in `{args.draw_img_save_dir}/system_results.txt`, where the `--draw_img_save_dir` arg is `inference_results` by default. Here are some results for examples.  
 
 <p align="left">
   <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/c58fb182-32b0-4b73-b4fd-7ba393e3f397" width=420/>
@@ -143,12 +135,18 @@ web_cvpr_0	[{"transcription": "canada", "points": [[430, 148], [540, 148], [540,
 img_10_0	[{"transcription": "residential", "points": [[43, 88], [149, 78], [151, 101], [44, 111]]}, {"transcription": "areas", "points": [[152, 83], [201, 81], [202, 98], [153, 100]]}, {"transcription": "when", "points": [[36, 56], [101, 56], [101, 78], [36, 78]]}, {"transcription": "you", "points": [[99, 54], [143, 52], [144, 78], [100, 80]]}, {"transcription": "pass", "points": [[140, 54], [186, 50], [188, 74], [142, 78]]}, {"transcription": "by", "points": [[182, 52], [208, 52], [208, 75], [182, 75]]}, {"transcription": "volume", "points": [[199, 30], [254, 30], [254, 46], [199, 46]]}, {"transcription": "your", "points": [[164, 28], [203, 28], [203, 46], [164, 46]]}, {"transcription": "lower", "points": [[109, 25], [162, 25], [162, 46], [109, 46]]}, {"transcription": "please", "points": [[31, 18], [109, 20], [108, 48], [30, 46]]}]
 ```
 
+**Notes:** 
+1. For more argument illustrations and usage, please run `python tools/infer/text/predict_system.py -h` or view `tools/infer/text/config.py`
+
+
+
 ### Evaluation of the Inference Results
 
-Run the following command to get the inference result on icdar15 test datast.
+Run the following command to get the inference result on [ICDAR15](https://rrc.cvc.uab.es/?ch=4&com=downloads) test datast.
 ```
 python tools/infer/text/predict_system.py --image_dir /path/to/icdar15/det/test_images  --det_algorithm DB  --rec_algorithm CRNN  --det_limit_type min --det_limit_side_len 736
 ```
+> Note: Due to the input image shape is 720x1280 in icdar15, we change `det_limit_type` to `min` here for better performance.  
 
 After running, the results including image names, bounding boxes (`points`) and recognized texts (`transcription`) will be saved in `{args.draw_img_save_dir}/system_results.txt`. The format of prediction results is shown below.
 
@@ -160,17 +158,18 @@ After running, the results including image names, bounding boxes (`points`) and 
 Prepare the **ground truth** file (in the same format as above), which can be obtained rom the dataset conversion script in `tools/dataset_converters`, and **prediction results** file, and run the following command to evaluate the prediction results.
 
 ```bash
-python deploy/eval_utils/eval_pipeline.py --gt_path path/to/gt.txt --pred_path path/to/ckpt_pred_result.txt
+python deploy/eval_utils/eval_pipeline.py --gt_path path/to/gt.txt --pred_path path/to/system_results.txt
    ```
 
 Here are the evaluation outcome for different inferene models. 
 
 | Det Algo| Rec Algo |  Dataset     | Inference acc |
-|---------|----------|----------------------------|---------------|
-| DBNet   | CRNN    | [ICDAR15](https://rrc.cvc.uab.es/?ch=4&com=downloads)<sup>*</sup> | 56.8% | 
+|---------|----------|--------------|---------------|
+| DBNet   | CRNN    | ICDAR15 | 56.48% | 
+| DBNet++   | RARE | ICDAR15 | 57.97 % | 
 
 
-## How to add support for a new model inference
+## Dev Guideline: How to Add a New Model for Inference
 
 ### Preprocessing 
 
