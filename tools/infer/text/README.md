@@ -156,12 +156,14 @@ The algorithm-network mapping is defined in `tools/infer/text/predict_rec.py`
 
 Currently, space char recognition is not supported for the listed models. We will support it soon.
 
-## Text Detection and Recognition Concatenation (End2End)
+## Text Detection and Recognition Concatenation
 
 To run text spoting (i.e., detect all text regions then recognize each of them) on an input image or multiple images in a directory, please run:
 
 ```shell
-python tools/infer/text/predict_system.py --image_dir {path_to_img or dir_to_imgs} --det_algorithm DB++ --rec_algorithm CRNN
+python tools/infer/text/predict_system.py --image_dir {path_to_img or dir_to_imgs} \
+                                          --det_algorithm DB++  \
+                                          --rec_algorithm CRNN
 ```
 
 After running, the inference results will be saved in `{args.draw_img_save_dir}/system_results.txt`, where the `--draw_img_save_dir` arg is `inference_results` by default. Here are some results for examples.  
@@ -205,7 +207,11 @@ web_cvpr_0	[{"transcription": "canada", "points": [[430, 148], [540, 148], [540,
 
 To infer on the whole [ICDAR15](https://rrc.cvc.uab.es/?ch=4&com=downloads) test set, please run:
 ```
-python tools/infer/text/predict_system.py --image_dir /path/to/icdar15/det/test_images  --det_algorithm DB  --rec_algorithm CRNN  --det_limit_type min --det_limit_side_len 736
+python tools/infer/text/predict_system.py --image_dir /path/to/icdar15/det/test_images  /
+                                          --det_algorithm DB    /
+                                          --rec_algorithm CRNN  /
+                                          --det_limit_type min  /
+                                          --det_limit_side_len 736
 ```
 > Note: Here we set`det_limit_type` as `min` for better performance, due to the input image in ICDAR15 is of high resolution (720x1280).  
 
@@ -221,9 +227,9 @@ Prepare the **ground truth** file (in the same format as above), which can be ob
 
 ```bash
 python deploy/eval_utils/eval_pipeline.py --gt_path path/to/gt.txt --pred_path path/to/system_results.txt
-   ```
+```
 
-Some of the pre-run evaluation results are as follows.
+Evaluation results are shown as follows.
 
 <div align="center">
   
@@ -234,30 +240,32 @@ Some of the pre-run evaluation results are as follows.
 
 </div>
 
-## Developer Guideline - How to Add a New Model for Inference
+## Argument List 
+
+All CLI argument definition can be viewed via `python tools/infer/text/predict_system.py -h` or reading `tools/infer/text/config.py`. 
+
+
+## Developer Guide - How to Add a New Model for Inference
 
 ### Preprocessing 
 
 The optimal preprocessing strategy can vary from model to model, especially for the resize setting (keep_ratio, padding, etc). We define the preprocessing pipeline for each model in `tools/infer/text/preprocess.py` for different tasks. 
 
-If you find the default preprocessing pipeline or hyper-params does not meet the network requirement, please extend the if-else conditions or add a new key-value pair  the `optimal_hparam` dict, where key is the algorithm name and value is the hyper-param setting. 
+If you find the default preprocessing pipeline or hyper-params does not meet the network requirement, please extend by changing the if-else conditions or adding a new key-value pair to the `optimal_hparam` dict in `tools/infer/text/preprocess.py`, where key is the algorithm name and the value is the suitable hyper-param setting for the target network inference.
 
 ### Network Inference
 
-Supported alogirhtms and their corresponding model names (which can be checked by the `list_model()`API) are defined in the `algo_to_model_name dict in ``predict_det.py` and `predict_rec.py`. 
+Supported alogirhtms and their corresponding network names (which can be checked by using the `list_model()` API) are defined in the `algo_to_model_name` dict in `predict_det.py` and `predict_rec.py`. 
 
-To add a new detection model for inference, please add a new key-value pair to `algo_to_model_name` dict, where key is the algo name parsed from `config.py` and value is the model name which is registered in `mindocr/models/{model}.py`. 
+To add a new detection model for inference, please add a new key-value pair to `algo_to_model_name` dict, where the key is an algorithm name and the value is the corresponding network name registered in `mindocr/models/{your_model}.py`. 
 
-By default, model weights will be loaded from the provided pretrained URL defined in `mindocr/models/{model}.py`. If you want to load a local checkpoint instead, please set the `--det_model_dir` or `--rec_model_dir` args in command line.  
+By default, model weights will be loaded from the pro-defined URL in `mindocr/models/{your_model}.py`. If you want to load a local checkpoint instead, please set `--det_model_dir` or `--rec_model_dir` to the path of your local checkpoint or the directory containing a model checkpoint.  
 
 ### Postproprocess
 
-Similary, the postprocess pipeline for each algorithm can vary and is defined in `tools/infer/text/postprocess.py`.
+Similar to preprocessing, the postprocessing method for each algorithm can vary. The postprocessing method for each algorithm is defined in `tools/infer/text/postprocess.py`.
 
-If you find the default postprocessing pipeline or hyper-params does not meet your need, please extend the if-else conditions or add a new key-value pair  the `optimal_hparam` dict, where key is the algorithm name and value is the hyper-param setting. 
+If you find the default postprocessing method or hyper-params does not meet the model need, please extend the if-else conditions or add a new key-value pair  to the `optimal_hparam` dict in `tools/infer/text/postprocess.py`, where the key is an algorithm name and the value is the hyper-param setting. 
 
 
-## Argument List 
-
-All CLI arguments definition can be viewed via `python tools/infer/text/predict_system.py -h` or reading `tools/infer/text/config.py`.    
 
