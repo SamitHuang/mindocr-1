@@ -1,5 +1,9 @@
 # MindOCR Online Inference
 
+**About Online Inference:** Online inference is to infer based on the native MindSpore framework by loading the model checkpoint file then running prediction with MindSpore APIs. 
+
+Compared to offline inference (see `deploy/py_infer`), online inferece does not require model conversion for target platform for deployment and can run directly on the training devices. But it requires installing the heavy AI framework and the model is not optimized for deployment.
+
 ## Dependency and Installation
 
 | Environment | Version |
