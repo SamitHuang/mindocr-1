@@ -38,7 +38,7 @@ Example 1:
   <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/ce136b92-f0aa-4a05-b689-9f60d0b40db1" width=480 />
 </p>
 <p align="center">
-  <em> Visualization of text detection on img_108.jpg</em>
+  <em> Visualization of text detection result on img_108.jpg</em>
 </p>
 
 , where the saved txt file is as follows
@@ -52,7 +52,7 @@ Example 2:
   <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/61066d4a-5922-471e-b702-2ea79c3cc525" width=480 />
 </p>
 <p align="center">
-  <em>Visualization of text detection on paper_sam.png</em>
+  <em>Visualization of text detection result on paper_sam.png</em>
 </p>
 
 , where the saved txt file is as follows
