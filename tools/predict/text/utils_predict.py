@@ -57,13 +57,17 @@ def update_config(args, cfg, model_type):
     Replace some args values in yaml file with their counterparts in args parser.
     """
     if model_type == 'det':
-        cfg.predict.dataset.dataset_root = args.image_dir #raw_data_dir
-        cfg.predict.dataset.data_dir = '.'
-        cfg.predict.ckpt_load_path = args.det_model_dir #det_ckpt_path
+        if args.raw_data_dir:
+            cfg.predict.dataset.dataset_root = args.raw_data_dir
+            cfg.predict.dataset.data_dir = '.'
+        if args.det_ckpt_path:
+            cfg.predict.ckpt_load_path = args.det_ckpt_path
     elif model_type == 'rec':
-        cfg.predict.dataset.dataset_root = args.crop_res_save_dir #crop_save_dir
-        cfg.predict.dataset.data_dir = '.'
-        cfg.predict.ckpt_load_path = args.rec_model_dir
+        if args.crop_save_dir:
+            cfg.predict.dataset.dataset_root = args.crop_save_dir
+            cfg.predict.dataset.data_dir = '.'
+        if args.rec_ckpt_path:
+            cfg.predict.ckpt_load_path = args.rec_ckpt_path
     else:
         raise ValueError(f"Invalid value of 'model_type'. It must be 'det' or 'rec'.")
 

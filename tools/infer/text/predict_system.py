@@ -161,7 +161,7 @@ def main():
     boxes_all, text_scores_all = [], []
     for i, img_path in enumerate(img_paths):
         print(f'\nINFO: Infering [{i+1}/{len(img_paths)}]: ', img_path)
-        boxes, text_scores, time_prof = text_spot(img_path, do_visualize=True)
+        boxes, text_scores, time_prof = text_spot(img_path, do_visualize=args.visualize_output)
         boxes_all.append(boxes)
         text_scores_all.append(text_scores)
 
@@ -179,7 +179,7 @@ def main():
     # save result
     save_res(boxes_all, text_scores_all, img_paths,
              save_path=os.path.join(save_dir, 'system_results.txt'))
-    print('Done! Results saved in ', save_dir)
+    print('Done! Results saved in ', os.path.join(save_dir, 'system_results.txt'))
 
 if __name__ == '__main__':
     main()
