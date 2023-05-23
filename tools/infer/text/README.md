@@ -1,6 +1,6 @@
 # MindOCR Online Inference
 
-## Dependency
+## Dependency and Installation
 
 | Environment | Version |
 |-------------|---------|
@@ -8,7 +8,20 @@
 | Python      | >=3.7   |
 
 Supported platforms: Linux, MacOS, Windows (Not tested) 
-Supported devices: CPU, GPU, and Ascend
+Supported devices: CPU, GPU, and Ascend.
+
+Please clone the MindOCR repo at first
+```shell
+git clone https://github.com/mindspore-lab/mindocr.git
+```
+
+To install the dependency, please run
+```shell
+pip install -r requirements.txt
+```
+
+For MindSpore(>=1.9) installation, please follow the official [installation instructions](https://www.mindspore.cn/install) for the best fit of your machine. 
+
 
 ## Text Detection
 
@@ -18,43 +31,56 @@ To run text detection on an input image or multiple images in a directory, pleas
 python tools/infer/text/predict_det.py  --image_dir {path_to_img or dir_to_imgs} --rec_algorithm DB++
 ```
 
-After running, the inference results will be saved in `{args.draw_img_save_dir}/det_results.txt`, where the `--draw_img_save_dir` arg is `inference_results` by default. Here are some results for examples.  
+After running, the inference results will be saved in `{args.draw_img_save_dir}/det_results.txt`, where the `--draw_img_save_dir` arg is `./inference_results` by default. Here are some results for examples.  
 
-<p align="left">
-  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/ce136b92-f0aa-4a05-b689-9f60d0b40db1" width=420 />
+Example 1:
+<p align="center">
+  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/ce136b92-f0aa-4a05-b689-9f60d0b40db1" width=480 />
+</p>
+<p align="center">
+  <em> Visualization of text detection on img_108.jpg</em>
 </p>
 
+, where the saved txt file is as follows
 ```
 img_108.jpg	[[[228.0, 440.0], [403.0, 413.0], [406.0, 433.0], [231.0, 459.0]], [[282.0, 280.0], [493.0, 252.0], [499.0, 293.0], [288.0, 321.0]], [[500.0, 253.0], [636.0, 232.0], [641.0, 269.0], [505.0, 289.0]], ...]
 ```
 
-<p align="left">
-  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/61066d4a-5922-471e-b702-2ea79c3cc525" width=420 />
+Example 2:
+
+<p align="center">
+  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/61066d4a-5922-471e-b702-2ea79c3cc525" width=480 />
+</p>
+<p align="center">
+  <em>Visualization of text detection on paper_sam.png</em>
 </p>
 
+, where the saved txt file is as follows
 ```
 paper_sam.png	[[[1161.0, 340.0], [1277.0, 340.0], [1277.0, 378.0], [1161.0, 378.0]], [[895.0, 335.0], [1152.0, 340.0], [1152.0, 382.0], [894.0, 378.0]], ...]
 ```
 
 **Notes:** 
-1. For input images with large resolution, you should set `--det_limit_side_len` larger like 1280, (default is 960). `--det_limit_type` and  
+- For input images with high resolution, please set `--det_limit_side_len` larger, e.g., 1280. `--det_limit_type` can be set as "min" or "max", where "min " means limiting the image size to be at least  `--det_limit_side_len`, "max" means limiting the image size to be at most `--det_limit_side_len`.
 
-2. For more argument illustrations and usage, please run `python tools/infer/text/predict_det.py -h` or view `tools/infer/text/config.py`
+- For more argument illustrations and usage, please run `python tools/infer/text/predict_det.py -h` or view `tools/infer/text/config.py`
 
-3. Currently, it only supports serial inference to avoid dynamic shape issue and achieve better performance.
+- Currently, this script runs serially to avoid dynamic shape issue and achieve better performance.
 
 
-### Supported Algorithms and corresponding Networks 
+### Supported Detection Algorithms and Networks 
 
-As defined in `predict_det.py`, the supported detection algorithms are as follows. 
-
-  | **Algorithm Name** | **Architecture** | **Support language** |  
+<div align="center">
+  
+  | **Algorithm Name** | **Network Name** | **Language** |  
   | :------: | :------: | :------: | 
   | DB  | dbnet_resnet50 | English |
   | DB++ | dbnetpp_resnet50 | English |
   | DB_MV3 | dbnet_mobilenetv3 | English |
+  
+</div>
 
-
+The algorithm-network mapping is defined in `tools/infer/text/predict_det.py`.
 
 ## Text Recognition
 
@@ -65,15 +91,23 @@ python tools/infer/text/predict_rec.py  --image_dir {path_to_img or dir_to_imgs}
 ```
 After running, the inference results will be saved in `{args.draw_img_save_dir}/rec_results.txt`, where the `--draw_img_save_dir` arg is `inference_results` by default. Here are some results for examples.  
 
-- English text recognition:
+- English text recognition
 
-<p align="left">
-  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/fa8c5e4e-0e05-4c93-b9a3-6e0327c1609f" width=100/>
+<p align="center">
+  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/fa8c5e4e-0e05-4c93-b9a3-6e0327c1609f" width=150 />
 </p>
-<p align="left">
-  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/8ec50bdf-ea6c-4bce-a799-2fdb8e9512b1" width=100/>
+<p align="center">
+  <em> word_1216.png </em>
 </p>
 
+<p align="center">
+  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/8ec50bdf-ea6c-4bce-a799-2fdb8e9512b1" width=150 />
+</p>
+<p align="center">
+  <em> word_1217.png </em>
+</p>
+
+Recognition results:
 ```text
 word_1216.png   coffee
 word_1217.png   club
@@ -81,34 +115,46 @@ word_1217.png   club
 
 - Chinese text recognition:
 
-<p align="left">
-  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/e220ade5-89ae-47a4-927f-2c28941a5965" width=120/>
+<p align="center">
+  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/e220ade5-89ae-47a4-927f-2c28941a5965" width=200 />
 </p>
-<p align="left">
-  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/d7cfee90-d586-4796-9ebf-b56872832e71" width=240/>
+<p align="center">
+  <em> cert_id.png </em>
 </p>
 
+<p align="center">
+  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/d7cfee90-d586-4796-9ebf-b56872832e71" width=400 />
+</p>
+<p align="center">
+  <em> doc_cn3.png </em>
+</p>
+
+Recognition results:
 ```text
 cert_id.png 公民身份号码44052419
 doc_cn3.png 马拉松选手不会为短暂的领先感到满意，而是永远在奔跑。
 ```
 
 **Notes:** 
-1. For more argument illustrations and usage, please run `python tools/infer/text/predict_rec.py -h` or view `tools/infer/text/config.py`
-2. Both batch-wise inference and single-mode inference are supported. 
+- For more argument illustrations and usage, please run `python tools/infer/text/predict_rec.py -h` or view `tools/infer/text/config.py`
+- Both batch-wise and single-mode inference are supported. Batch mode is enabled by default for better speed. You can set the batch size via `--rec_batch_size`. You can also run in single-mode by set `--det_batch_mode` False, which may improve accuracy if the text length varies a lot.
 
-### Supported Algorithms and corresponding Networks 
+### Supported Recognition Algorithms and Networks 
 
-As defined in `predict_rec.py`, the supported recognition algorithms are as follows. 
-
-  | **Algorithm Name** | **Architecture** | **Support language** |  
+<div align="center">
+  
+  | **Algorithm Name** | **Network Name** | **Language** |  
   | :------: | :------: | :------: | 
   | CRNN | crnn_resnet34 | English | 
   | RARE | rare_resnet34 | English |
   | CRNN_CH | crnn_resnet34_ch | Chinese |
   | RARE_CH | rare_resnet34_ch | Chinese |
+  
+</div>
 
-Note: Currently, the listed models doesn't support space char recognition (will support soon)
+The algorithm-network mapping is defined in `tools/infer/text/predict_rec.py`
+
+Currently, space char recognition is not supported for the listed models. We will support it soon.
 
 ## Text Detection and Recognition Concatenation (End2End)
 
@@ -120,20 +166,35 @@ python tools/infer/text/predict_system.py --image_dir {path_to_img or dir_to_img
 
 After running, the inference results will be saved in `{args.draw_img_save_dir}/system_results.txt`, where the `--draw_img_save_dir` arg is `inference_results` by default. Here are some results for examples.  
 
-<p align="left">
-  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/c58fb182-32b0-4b73-b4fd-7ba393e3f397" width=420/>
+Example 1:
+
+<p align="center">
+  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/c1f53970-8618-4039-994f-9f6dc1eee1dd" width=600 />
 </p>
+<p align="center">
+  <em> Visualization of text detection and recognition result on img_10.jpg </em>
+</p>
+
+, where the saved txt file is as follows
+```text
+img_10.jpg	[{"transcription": "residential", "points": [[43, 88], [149, 78], [151, 101], [44, 111]]}, {"transcription": "areas", "points": [[152, 83], [201, 81], [202, 98], [153, 100]]}, {"transcription": "when", "points": [[36, 56], [101, 56], [101, 78], [36, 78]]}, {"transcription": "you", "points": [[99, 54], [143, 52], [144, 78], [100, 80]]}, {"transcription": "pass", "points": [[140, 54], [186, 50], [188, 74], [142, 78]]}, {"transcription": "by", "points": [[182, 52], [208, 52], [208, 75], [182, 75]]}, {"transcription": "volume", "points": [[199, 30], [254, 30], [254, 46], [199, 46]]}, {"transcription": "your", "points": [[164, 28], [203, 28], [203, 46], [164, 46]]}, {"transcription": "lower", "points": [[109, 25], [162, 25], [162, 46], [109, 46]]}, {"transcription": "please", "points": [[31, 18], [109, 20], [108, 48], [30, 46]]}]
+```
+
+Example 2:
+
+<p align="center">
+  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/c58fb182-32b0-4b73-b4fd-7ba393e3f397" width=480 />
+</p>
+<p align="center">
+  <em> Visualization of text detection and recognition result on web_cvpr_0.png </em>
+</p>
+
+, where the saved txt file is as follows
 
 ```text
 web_cvpr_0	[{"transcription": "canada", "points": [[430, 148], [540, 148], [540, 171], [430, 171]]}, {"transcription": "vancouver", "points": [[263, 148], [420, 148], [420, 171], [263, 171]]}, {"transcription": "cvpr", "points": [[32, 69], [251, 63], [254, 174], [35, 180]]}, {"transcription": "2023", "points": [[194, 44], [256, 45], [255, 72], [194, 70]]}, {"transcription": "june", "points": [[36, 45], [110, 44], [110, 70], [37, 71]]}, {"transcription": "1822", "points": [[114, 43], [190, 45], [190, 70], [113, 69]]}]
 ```
-<p align="left">
-  <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/c1f53970-8618-4039-994f-9f6dc1eee1dd" width=420/>
-</p>
 
-```text
-img_10_0	[{"transcription": "residential", "points": [[43, 88], [149, 78], [151, 101], [44, 111]]}, {"transcription": "areas", "points": [[152, 83], [201, 81], [202, 98], [153, 100]]}, {"transcription": "when", "points": [[36, 56], [101, 56], [101, 78], [36, 78]]}, {"transcription": "you", "points": [[99, 54], [143, 52], [144, 78], [100, 80]]}, {"transcription": "pass", "points": [[140, 54], [186, 50], [188, 74], [142, 78]]}, {"transcription": "by", "points": [[182, 52], [208, 52], [208, 75], [182, 75]]}, {"transcription": "volume", "points": [[199, 30], [254, 30], [254, 46], [199, 46]]}, {"transcription": "your", "points": [[164, 28], [203, 28], [203, 46], [164, 46]]}, {"transcription": "lower", "points": [[109, 25], [162, 25], [162, 46], [109, 46]]}, {"transcription": "please", "points": [[31, 18], [109, 20], [108, 48], [30, 46]]}]
-```
 
 **Notes:** 
 1. For more argument illustrations and usage, please run `python tools/infer/text/predict_system.py -h` or view `tools/infer/text/config.py`
@@ -142,34 +203,38 @@ img_10_0	[{"transcription": "residential", "points": [[43, 88], [149, 78], [151,
 
 ### Evaluation of the Inference Results
 
-Run the following command to get the inference result on [ICDAR15](https://rrc.cvc.uab.es/?ch=4&com=downloads) test datast.
+To infer on the whole [ICDAR15](https://rrc.cvc.uab.es/?ch=4&com=downloads) test set, please run:
 ```
 python tools/infer/text/predict_system.py --image_dir /path/to/icdar15/det/test_images  --det_algorithm DB  --rec_algorithm CRNN  --det_limit_type min --det_limit_side_len 736
 ```
-> Note: Due to the input image shape is 720x1280 in icdar15, we change `det_limit_type` to `min` here for better performance.  
+> Note: Here we set`det_limit_type` as `min` for better performance, due to the input image in ICDAR15 is of high resolution (720x1280).  
 
-After running, the results including image names, bounding boxes (`points`) and recognized texts (`transcription`) will be saved in `{args.draw_img_save_dir}/system_results.txt`. The format of prediction results is shown below.
+After running, the results including image names, bounding boxes (`points`) and recognized texts (`transcription`) will be saved in `{args.draw_img_save_dir}/system_results.txt`. The format of prediction results is shown as follows.
 
 ```text
    img_1.jpg	[{"transcription": "hello", "points": [600, 150, 715, 157, 714, 177, 599, 170]}, {"transcription": "world", "points": [622, 126, 695, 129, 694, 154, 621, 151]}, ...]
    img_2.jpg	[{"transcription": "apple", "points": [553, 338, 706, 318, 709, 342, 556, 362]}, ...]
    ...
 ```
-Prepare the **ground truth** file (in the same format as above), which can be obtained rom the dataset conversion script in `tools/dataset_converters`, and **prediction results** file, and run the following command to evaluate the prediction results.
+
+Prepare the **ground truth** file (in the same format as above), which can be obtained from the dataset conversion script in `tools/dataset_converters`, and run the following command to evaluate the prediction results.
 
 ```bash
 python deploy/eval_utils/eval_pipeline.py --gt_path path/to/gt.txt --pred_path path/to/system_results.txt
    ```
 
-Here are the evaluation outcome for different inferene models. 
+Some of the pre-run evaluation results are as follows.
 
-| Det Algo| Rec Algo |  Dataset     | Inference acc |
+<div align="center">
+  
+| Det. Algorithm| Rec. Algorithm |  Dataset     | Accuracy |
 |---------|----------|--------------|---------------|
 | DBNet   | CRNN    | ICDAR15 | 56.48% | 
 | DBNet++   | RARE | ICDAR15 | 57.97 % | 
 
+</div>
 
-## Dev Guideline: How to Add a New Model for Inference
+## Developer Guideline - How to Add a New Model for Inference
 
 ### Preprocessing 
 
