@@ -31,7 +31,7 @@ To run text detection on an input image or a directory containing multiple image
 python tools/infer/text/predict_det.py  --image_dir {path_to_img or dir_to_imgs} --rec_algorithm DB++
 ```
 
-After running, the inference results will be saved in `{args.draw_img_save_dir}/det_results.txt`, where the `--draw_img_save_dir` arg is `./inference_results` by default. Here are some results for examples.  
+After running, the inference results will be saved in `{args.draw_img_save_dir}/det_results.txt`, where `--draw_img_save_dir` is the directory for saving  results and is set to `./inference_results` by default Here are some results for examples.  
 
 Example 1:
 <p align="center">
@@ -89,7 +89,7 @@ To run text recognition on an input image or a directory containing multiple ima
 ```shell
 python tools/infer/text/predict_rec.py  --image_dir {path_to_img or dir_to_imgs} --rec_algorithm CRNN
 ```
-After running, the inference results will be saved in `{args.draw_img_save_dir}/rec_results.txt`, where the `--draw_img_save_dir` arg is `inference_results` by default. Here are some results for examples.  
+After running, the inference results will be saved in `{args.draw_img_save_dir}/rec_results.txt`, where `--draw_img_save_dir` is the directory for saving  results and is set to `./inference_results` by default. Here are some results for examples.  
 
 - English text recognition
 
@@ -166,7 +166,7 @@ python tools/infer/text/predict_system.py --image_dir {path_to_img or dir_to_img
                                           --rec_algorithm CRNN
 ```
 
-After running, the inference results will be saved in `{args.draw_img_save_dir}/system_results.txt`, where the `--draw_img_save_dir` arg is `inference_results` by default. Here are some results for examples.  
+After running, the inference results will be saved in `{args.draw_img_save_dir}/system_results.txt`,  where `--draw_img_save_dir` is the directory for saving  results and is set to `./inference_results` by default. Here are some results for examples.  
 
 Example 1:
 
