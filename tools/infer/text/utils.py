@@ -89,6 +89,16 @@ def crop_text_region(img, points, box_type='quad', rotate_if_vertical=True): #po
         crop_img = crop_img_box(img, np.array(box))
         return crop_img
 
+def sorted_boxes(boxes):
+    """
+    Sort boxes in order from top to bottom, left to right
+    boxes: list of box
+    """
+
+    sorted_boxes = sorted(boxes, key=lambda b: (b[0][1], b[0][0]))
+
+    return sorted_boxes
+
 
 def eval_rec_res(rec_res_fp, gt_fp, lower=True, ignore_space=True, filter_ood=True, char_dict_path=None):
     #gt_list = os.listdir(gt)
