@@ -10,12 +10,12 @@
 Supported platforms: Linux, MacOS, Windows (Not tested) 
 Supported devices: CPU, GPU, and Ascend.
 
-Please clone the MindOCR repo at first
+Please clone MindOCR at first
 ```shell
 git clone https://github.com/mindspore-lab/mindocr.git
 ```
 
-To install the dependency, please run
+Then install the dependency by
 ```shell
 pip install -r requirements.txt
 ```
@@ -25,7 +25,7 @@ For MindSpore(>=1.9) installation, please follow the official [installation inst
 
 ## Text Detection
 
-To run text detection on an input image or multiple images in a directory, please run:
+To run text detection on an input image or a directory containing multiple images, please execute
 
 ```shell
 python tools/infer/text/predict_det.py  --image_dir {path_to_img or dir_to_imgs} --rec_algorithm DB++
@@ -84,7 +84,7 @@ The algorithm-network mapping is defined in `tools/infer/text/predict_det.py`.
 
 ## Text Recognition
 
-To run text recognition on an input image or multiple images in a directory, please run:
+To run text recognition on an input image or a directory containing multiple images, please execute
 
 ```shell
 python tools/infer/text/predict_rec.py  --image_dir {path_to_img or dir_to_imgs} --rec_algorithm CRNN
