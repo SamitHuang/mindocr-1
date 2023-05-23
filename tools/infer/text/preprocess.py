@@ -12,7 +12,7 @@ class Preprocessor(object):
     def __init__(self, task='det', algo='DB', **kwargs):
         #algo = algo.lower()
         if task == 'det':
-            target_limit_side = kwargs.get('det_limit_side_len', 736)
+            limit_side_len = kwargs.get('det_limit_side_len', 736)
             limit_type = kwargs.get('det_limit_type', 'min')
 
             pipeline = [
@@ -23,7 +23,7 @@ class Preprocessor(object):
                 {'DetResize':
                      {'target_size': None, #[ 1152, 2048 ]
                       'keep_ratio': True,
-                      'target_limit_side': target_limit_side, # TODO: add to arg
+                      'limit_side_len': limit_side_len, # TODO: add to arg
                       'limit_type': limit_type,
                       'padding': False,
                       'force_divisable': False # TODO: needed?
@@ -37,7 +37,7 @@ class Preprocessor(object):
 
             # TODO: modify the base pipeline for non-DBNet network if needed
             #if algo == 'DB++':
-            #    pipeline[1]['DetResize']['target_limit_side'] = 1152
+            #    pipeline[1]['DetResize']['limit_side_len'] = 1152
         elif task == 'rec':
             DEFAULT_PADDING = True
             DEFAULT_KEEP_RATIO = True

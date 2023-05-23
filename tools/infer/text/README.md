@@ -145,17 +145,22 @@ img_10_0	[{"transcription": "residential", "points": [[43, 88], [149, 78], [151,
 
 ### Evaluation of the Inference Results
 
-   After the prediction finishes, the results including image names, bounding boxes (`points`) and recognized texts (`transcription`) will be saved in `{args.draw_img_save_dir}/system_results.txt`. The format of prediction results is shown below.
-   ```text
+Run the following command to get the inference result on icdar15 test datast.
+```
+python tools/infer/text/predict_system.py --image_dir /path/to/icdar15/det/test_images  --det_algorithm DB  --rec_algorithm CRNN  --det_limit_type min --det_limit_side_len 736
+```
+
+After running, the results including image names, bounding boxes (`points`) and recognized texts (`transcription`) will be saved in `{args.draw_img_save_dir}/system_results.txt`. The format of prediction results is shown below.
+
+```text
    img_1.jpg	[{"transcription": "hello", "points": [600, 150, 715, 157, 714, 177, 599, 170]}, {"transcription": "world", "points": [622, 126, 695, 129, 694, 154, 621, 151]}, ...]
    img_2.jpg	[{"transcription": "apple", "points": [553, 338, 706, 318, 709, 342, 556, 362]}, ...]
    ...
-   ```
-   Prepare the **ground truth** file (in the same format as above) and **prediction results** file, and then run the following command to evaluate the prediction results.
+```
+Prepare the **ground truth** file (in the same format as above), which can be obtained rom the dataset conversion script in `tools/dataset_converters`, and **prediction results** file, and run the following command to evaluate the prediction results.
 
-   ```bash
-   cd deploy/eval_utils
-   python eval_pipeline.py --gt_path path/to/gt.txt --pred_path path/to/ckpt_pred_result.txt
+```bash
+python deploy/eval_utils/eval_pipeline.py --gt_path path/to/gt.txt --pred_path path/to/ckpt_pred_result.txt
    ```
 
 Here are the evaluation outcome for different inferene models. 
