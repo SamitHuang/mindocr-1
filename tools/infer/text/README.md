@@ -38,7 +38,7 @@ paper_sam.png	[[[1161.0, 340.0], [1277.0, 340.0], [1277.0, 378.0], [1161.0, 378.
 
 **Notes:** 
 
-1. For large input images, you may set `--det_limit_side_len` larger like (default is 960)`--det_limit_type` and  
+1. For input images with large resolution, you should set `--det_limit_side_len` larger like 1280, (default is 960). `--det_limit_type` and  
 
 2. For more argument illustrations and usage, please run `python tools/infer/text/predict_det.py -h` or view `tools/infer/text/config.py`
 
