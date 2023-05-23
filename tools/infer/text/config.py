@@ -82,6 +82,7 @@ def create_parser():
     parser.add_argument("--draw_img_save_dir", type=str, default="./inference_results", help='Dir to save visualization and detection/recogintion/system prediction results')
     parser.add_argument("--save_crop_res", type=str2bool, default=False, help='Whether to save images cropped from text detection results.')
     parser.add_argument("--crop_res_save_dir", type=str, default="./output", help='Dir to save the cropped images for text boxes')
+    parser.add_argument("--visualize_output", type=str2bool, default=False, help='Whether to visualize results and save the visualized image.')
 
     # multi-process
     '''
