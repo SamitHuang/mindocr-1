@@ -20,6 +20,15 @@ class Preprocessor(object):
                      {'img_mode': 'RGB',
                       'keep_ori': True,
                       'to_float32': False}},
+                #{'DetResize':
+                #     {'target_size': [732, 1280],
+                #      'keep_ratio': False,
+                #      'target_limit_side': None, #target_limit_side, # TODO: add to arg
+                #      'limit_type': None, #limit_type,
+                #      'padding': False,
+                #      'force_divisable': True,
+                #      'divisor': 32
+                #     }},
                 {'DetResize':
                      {'target_size': None, #[ 1152, 2048 ]
                       'keep_ratio': True,
