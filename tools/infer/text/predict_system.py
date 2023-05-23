@@ -172,7 +172,8 @@ def main():
                 tot_time[k] += time_prof[k]
 
     fps = len(img_paths) / tot_time['all']
-    print('Total time:', tot_time['all'], 'Average FPS: ', fps)
+    print('Total time:', tot_time['all'])
+    print('Average FPS: ', fps)
     avg_time = {k: tot_time[k]/len(img_paths) for k in tot_time}
     print('Averge time cost: ', avg_time)
 

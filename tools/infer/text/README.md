@@ -18,23 +18,8 @@ To run text detection on an input image or multiple images in a directory, pleas
 python tools/infer/text/predict_det.py  --image_dir {path_to_img or dir_to_imgs} --rec_algorithm DB++
 ```
 
-For more argument illustrations and usage, please run `python tools/infer/text/predict_det.py -h` or view `tools/infer/text/config.py`
+After running, the inference results will be saved in `{args.draw_img_save_dir}/det_results.txt`, where the `--draw_img_save_dir` arg is `inference_results` by default. Here are some example detection results.  
 
-By default, the inference results will be saved in `./inference_results/det_results.txt`, which can be changed via `--draw_img_save_dir` argument. 
-
-Currently, it only supports serial inference to avoid dynamic shape issue and achieve better performance.
-
-### Supported Algorithms and corresponding Networks 
-
-As defined in `predict_det.py`, the supported detection algorithms are as follows. 
-
-  | **Algorithm Name** | **Architecture** | **Support language** |  
-  | :------: | :------: | :------: | 
-  | DB  | dbnet_resnet50 | English |
-  | DB++ | dbnetpp_resnet50 | English |
-  | DB_MV3 | dbnet_mobilenetv3 | English |
-
-### Demo Results
 <p align="left">
   <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/ce136b92-f0aa-4a05-b689-9f60d0b40db1" width=420 />
 </p>
@@ -50,6 +35,28 @@ img_108.jpg	[[[228.0, 440.0], [403.0, 413.0], [406.0, 433.0], [231.0, 459.0]], [
 ```
 paper_sam.png	[[[1161.0, 340.0], [1277.0, 340.0], [1277.0, 378.0], [1161.0, 378.0]], [[895.0, 335.0], [1152.0, 340.0], [1152.0, 382.0], [894.0, 378.0]], ...]
 ```
+
+**Notes:** 
+
+1. For large input images, you may set `--det_limit_side_len` larger like (default is 960)`--det_limit_type` and  
+
+2. For more argument illustrations and usage, please run `python tools/infer/text/predict_det.py -h` or view `tools/infer/text/config.py`
+
+3. Currently, it only supports serial inference to avoid dynamic shape issue and achieve better performance.
+
+
+### Supported Algorithms and corresponding Networks 
+
+As defined in `predict_det.py`, the supported detection algorithms are as follows. 
+
+  | **Algorithm Name** | **Architecture** | **Support language** |  
+  | :------: | :------: | :------: | 
+  | DB  | dbnet_resnet50 | English |
+  | DB++ | dbnetpp_resnet50 | English |
+  | DB_MV3 | dbnet_mobilenetv3 | English |
+
+
+### Some Results
 
 ## Text Recognition
 
@@ -78,7 +85,7 @@ As defined in `predict_rec.py`, the supported recognition algorithms are as foll
 
 Note: the above models doesn't support space char recognition.
 
-### Demo Results
+### Some Results
 
 English text recognition:
 
@@ -119,7 +126,8 @@ For more argument illustrations and usage, please run `python tools/infer/text/p
 
 By default, the inference and visualization results will be saved in `./inference_results/`, which is defined by the `--draw_img_save_dir` argument. 
 
-### Demo Results
+### Some Results
+
 <p align="left">
   <img src="https://github.com/SamitHuang/mindocr-1/assets/8156835/c58fb182-32b0-4b73-b4fd-7ba393e3f397" width=420/>
 </p>
@@ -135,9 +143,9 @@ web_cvpr_0	[{"transcription": "canada", "points": [[430, 148], [540, 148], [540,
 img_10_0	[{"transcription": "residential", "points": [[43, 88], [149, 78], [151, 101], [44, 111]]}, {"transcription": "areas", "points": [[152, 83], [201, 81], [202, 98], [153, 100]]}, {"transcription": "when", "points": [[36, 56], [101, 56], [101, 78], [36, 78]]}, {"transcription": "you", "points": [[99, 54], [143, 52], [144, 78], [100, 80]]}, {"transcription": "pass", "points": [[140, 54], [186, 50], [188, 74], [142, 78]]}, {"transcription": "by", "points": [[182, 52], [208, 52], [208, 75], [182, 75]]}, {"transcription": "volume", "points": [[199, 30], [254, 30], [254, 46], [199, 46]]}, {"transcription": "your", "points": [[164, 28], [203, 28], [203, 46], [164, 46]]}, {"transcription": "lower", "points": [[109, 25], [162, 25], [162, 46], [109, 46]]}, {"transcription": "please", "points": [[31, 18], [109, 20], [108, 48], [30, 46]]}]
 ```
 
-### Result Evaluation
+### Evaluation of the Inference Results
 
-   After the prediction finishes, the results including image names, bounding boxes (`points`) and recognized texts (`transcription`) will be saved in `args.draw_img_save_dir` (`inference_results/system_results.txt` by default). The format of prediction results is shown below.
+   After the prediction finishes, the results including image names, bounding boxes (`points`) and recognized texts (`transcription`) will be saved in `{args.draw_img_save_dir}/system_results.txt`. The format of prediction results is shown below.
    ```text
    img_1.jpg	[{"transcription": "hello", "points": [600, 150, 715, 157, 714, 177, 599, 170]}, {"transcription": "world", "points": [622, 126, 695, 129, 694, 154, 621, 151]}, ...]
    img_2.jpg	[{"transcription": "apple", "points": [553, 338, 706, 318, 709, 342, 556, 362]}, ...]
@@ -150,11 +158,11 @@ img_10_0	[{"transcription": "residential", "points": [[43, 88], [149, 78], [151,
    python eval_pipeline.py --gt_path path/to/gt.txt --pred_path path/to/ckpt_pred_result.txt
    ```
 
-Here are the result evaluation for different inferene models. 
+Here are the evaluation outcome for different inferene models. 
 
 | Det Algo| Rec Algo |  Dataset     | Inference acc |
-|---------|------------------|----------------------------|---------------|
-| DBNet   | CRNN             | [ICDAR15](https://rrc.cvc.uab.es/?ch=4&com=downloads)<sup>*</sup> | 55.99% | 
+|---------|----------|----------------------------|---------------|
+| DBNet   | CRNN    | [ICDAR15](https://rrc.cvc.uab.es/?ch=4&com=downloads)<sup>*</sup> | 56.8% | 
 
 
 ## How to add support for a new model inference
@@ -180,7 +188,7 @@ Similary, the postprocess pipeline for each algorithm can vary and is defined in
 If you find the default postprocessing pipeline or hyper-params does not meet your need, please extend the if-else conditions or add a new key-value pair  the `optimal_hparam` dict, where key is the algorithm name and value is the hyper-param setting. 
 
 
-## Command Line Arguments 
+## Argument List 
 
 All CLI arguments definition can be viewed via `python tools/infer/text/predict_system.py -h` or reading `tools/infer/text/config.py`.    
 
