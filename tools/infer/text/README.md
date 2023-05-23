@@ -2,7 +2,7 @@
 
 **About Online Inference:** Online inference is to infer based on the native MindSpore framework by loading the model checkpoint file then running prediction with MindSpore APIs. 
 
-Compared to offline inference (see `deploy/py_infer`), online inferece does not require model conversion for target platform for deployment and can run directly on the training devices. But it requires installing the heavy AI framework and the model is not optimized for deployment.
+Compared to offline inference, which is implemented in `deploy/py_infer`, online inferece does not require model conversion for target platform and can run directly on the training devices (e.g. Ascend 910). But it requires installing the heavy AI framework and the model is not optimized for deployment. So it is more for demonstration and quick inference evaluation after model training.
 
 ## Dependency and Installation
 
