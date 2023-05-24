@@ -178,9 +178,9 @@ def validate_det_res(det_res, img_shape, order_clockwise=True, min_poly_points=3
                 new_scores.append(scores[i])
 
     if len(scores) > 0:
-        new_det_res = dict(polys=np.array(new_polys), scores=new_scores)
+        new_det_res = dict(polys=np.array(new_polys, dtype=int), scores=new_scores)
     else:
-        new_det_res = dict(polys=np.array(new_polys))
+        new_det_res = dict(polys=np.array(new_polys, dtype=int))
 
     # TODO: sort polygons from top to bottom, left to right
 

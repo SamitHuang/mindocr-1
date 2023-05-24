@@ -12,13 +12,14 @@ def get_image_paths(img_dir):
     fmts = ['jpg', 'png', 'jpeg']
     img_paths = []
     if os.path.isfile(img_dir):
+        assert os.path.exists(img_dir), f'{img_dir} does NOT exist. Please check the file path.'
         img_paths.append(img_dir)
     else:
         for fmt in fmts:
             img_paths.extend(glob.glob(os.path.join(img_dir, f'*.{fmt}')))
             img_paths.extend(glob.glob(os.path.join(img_dir, f'*.{fmt.upper()}')))
 
-    assert len(img_paths) > 0, f'No image files found in {img_dir}. Please check the image_dir arg.'
+    assert len(img_paths) > 0, f'{img_dir} does NOT exist, or no image files exist in {img_dir}. Please check the `image_dir` arg value.'
     return sorted(img_paths)
 
 def get_ckpt_file(ckpt_dir):

@@ -1,18 +1,18 @@
 import os
 import sys
 import argparse
+from base_predict import BasePredict
+from utils_predict import check_args, update_config, save_pipeline_results, rescale, load_yaml
+from visualize import Visualization, VisMode
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.abspath(os.path.join(__dir__, "../../../")))
+sys.path.insert(0, os.path.abspath(os.path.join(__dir__, "../../../../")))
 
 import numpy as np
 import cv2
 from time import time
 
-from tools.predict.text.base_predict import BasePredict
-from tools.utils.visualize import Visualization, VisMode
 from mindocr.utils.visualize import recover_image
-from tools.predict.text.utils_predict import check_args, update_config, save_pipeline_results, rescale, load_yaml
 
 def parse_args():
     """
