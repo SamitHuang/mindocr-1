@@ -1,6 +1,11 @@
-# MindOCR detection and recognition prediction pipeline
+# MindOCR Detection and Recognition Online Inference (Parallel)
+
+This folder contains code and scripts for MindOCR online parallel inference. Instead of inferring detection for one image followed by recognizing all the detected regions batch-wisely, the parallel version intends to infer detection for all input images at first, save all the cropped images for the detected regions, and finally run text recognition on all the crop images at once.
+> The current code only support batch size = 1.
+> To run it for your model, please add `predict` section in the model yaml config file to describe the data processing and loading pipeline for inference. 
 
 This doc introduces how to run the detection and recognition prediction pipeline using MindOCR-trained ckpt files.
+
 
 ## 1. Pipeline model lists
 
