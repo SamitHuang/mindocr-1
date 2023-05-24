@@ -185,10 +185,10 @@ class DetResize(object):
     Resize the image and text polygons (if have) for text detection
 
     Args:
-        target_size: target size [H, W] of the output image. Effective when there is no limitation on side lenght (limit_type=None). Default is None.
-        keep_ratio: whether to keep aspect ratio
+        target_size: target size [H, W] of the output image. If it is not None, `limit_type` will be forced to None and side limit-based resizng will not make effect. Default: None.
+        keep_ratio: whether to keep aspect ratio. Default: True
         padding: whether to pad the image to the `target_size` after "keep-ratio" resizing. Only used when keep_ratio is True. Default False.
-        limit_type: it decides the resize method type. Option: 'min', 'max', None. Default is min.
+        limit_type: it decides the resize method type. Option: 'min', 'max', None. Default: "min"
             - 'min': images will be resized by limiting the mininum side length to `limit_side_len`, i.e., any side of the image must be larger than or equal to `limit_side_len`. If the input image alreay fulfill this limitation, no scaling will performed. If not, input image will be up-scaled with the ratio of (limit_side_len / shorter side length)
             - 'max': images will be resized by limiting the maximum side length to `limit_side_len`, i.e., any side of the image must be smaller than or equal to `limit_side_len`. If the input image alreay fulfill this limitation, no scaling will performed. If not, input image will be down-scaled with the ratio of (limit_side_len / longer side length)
             -  None: No limitation. Images will be resized to `target_size` with or without `keep_ratio` and `padding`
@@ -198,10 +198,8 @@ class DetResize(object):
         interpoloation: interpolation method
 
     Note:
-        1. The default choices limit_type=min, padding=False with large `limit_side_len` are recommended for inference in detection for better accuracy,
-            which is the equivalent to the default setting in ppocr for text-detection model evaluation.
-        2. If target_size set, keep_ratio=True, limit_type=auto, padding=True, this transform works the same as ScalePadImage,
-            which is preferred for batch train/eval/infer in graph mode for consistent batch shape.
+        1. The default choices limit_type=min, with large `limit_side_len` are recommended for inference in detection for better accuracy,
+        2. If target_size set, keep_ratio=True, limit_type=null, padding=True, this transform works the same as ScalePadImage,
         3. If inference speed is the first priority to guarante, you can set limit_type=max with a small `limit_side_len` like 960.
     """
     def __init__(self,
@@ -213,6 +211,9 @@ class DetResize(object):
                  force_divisable = True,
                  divisor = 32,
                  interpolation=cv2.INTER_LINEAR):
+
+        if target_size is not None:
+            limit_type = None
 
         self.target_size = target_size
         self.keep_ratio = keep_ratio
@@ -293,12 +294,11 @@ class DetResize(object):
         else:
             data['image'] = resized_img
 
+        scale_h = resize_h / h
+        scale_w = resize_w / w
         if 'polys' in data:
             data['polys'][:, :, 0] = data['polys'][:, :, 0] * scale_w
             data['polys'][:, :, 1] = data['polys'][:, :, 1] * scale_h
-
-        scale_h = resize_h / h
-        scale_w = resize_w / w
         data['shape'] = [h, w, scale_h, scale_w]
 
         return data
