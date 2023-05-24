@@ -32,10 +32,10 @@ class Preprocessor(object):
                 {'DetResize':
                      {'target_size': None, #[ 1152, 2048 ]
                       'keep_ratio': True,
-                      'limit_side_len': limit_side_len, # TODO: add to arg
+                      'limit_side_len': limit_side_len,
                       'limit_type': limit_type,
                       'padding': False,
-                      'force_divisable': False # TODO: needed?
+                      'force_divisable': True,
                      }},
                 {'NormalizeImage':
                      {'bgr_to_rgb': False,
@@ -43,7 +43,7 @@ class Preprocessor(object):
                     'mean': IMAGENET_DEFAULT_MEAN,
                     'std': IMAGENET_DEFAULT_STD}},
                 {'ToCHWImage': None}]
-
+            print(f'INFO: Pick optimal preprocess hyper-params for det algo {algo}:\n', pipeline[1])
             # TODO: modify the base pipeline for non-DBNet network if needed
             #if algo == 'DB++':
             #    pipeline[1]['DetResize']['limit_side_len'] = 1152
