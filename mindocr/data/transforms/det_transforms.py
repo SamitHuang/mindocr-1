@@ -8,7 +8,7 @@ import math
 import json
 import cv2
 import pyclipper
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, box
 import numpy as np
 
 __all__ = ['DetLabelEncode', 'BorderMap', 'ShrinkBinaryMap', 'expand_poly', 'PSEGtDecode',

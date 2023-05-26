@@ -4,7 +4,6 @@ from typing import List, Union
 import cv2
 import numpy as np
 from PIL import Image
-from shapely.geometry import Polygon, box
 from mindspore.dataset.vision import RandomColorAdjust as MSRandomColorAdjust, ToPIL
 
 from ...data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
