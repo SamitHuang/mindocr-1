@@ -395,17 +395,20 @@ class DetResize(object):
             if max(h, w) > self.limit_side_len:  # downscale
                 scale_ratio = self.limit_side_len / float(max(h, w))
         elif not self.limit_type:
-            if self.keep_ratio:
+            if self.keep_ratio and self.target_size:
                 # scale the image until it fits in the target size at most. The left part could be filled by padding.
                 scale_ratio = min(tar_h / h, tar_w / w)
                 allow_padding = True
 
-        if (self.limit_type in ['min', 'max']) or self.keep_ratio:
+        if (self.limit_type in ['min', 'max']) or (self.target_size and self.keep_ratio):
             resize_w = math.ceil(w * scale_ratio)
             resize_h = math.ceil(h * scale_ratio)
-        else:
+        elif self.target_size:
             resize_w = tar_w
             resize_h = tar_h
+        else: # both target_size and limit_type is None. resize by force_divisable
+            resize_w = w
+            resize_h - h
 
         if self.force_divisable:
             if not (
@@ -447,7 +450,7 @@ class GridResize(DetResize):
                  target_size= None,
                  keep_ratio=False,
                  padding=False,
-                 limit_side_len=None,
+                 limit_type=None,
                  force_divisable=True,
                  divisor=factor,
                  )
@@ -466,7 +469,7 @@ class ScalePadImage(DetResize):
                  target_size=target_size,
                  keep_ratio=True,
                  padding=True,
-                 limit_side_len=None,
+                 limit_type=None,
                  force_divisable=False,
                  )
 
