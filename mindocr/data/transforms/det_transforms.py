@@ -408,7 +408,7 @@ class DetResize(object):
             resize_h = tar_h
         else: # both target_size and limit_type is None. resize by force_divisable
             resize_w = w
-            resize_h - h
+            resize_h = h
 
         if self.force_divisable:
             if not (
