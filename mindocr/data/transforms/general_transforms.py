@@ -137,7 +137,7 @@ class RandomScale:
         scale_range: (min, max) scale range.
         p: probability of the augmentation being applied to an image.
     """
-    def __init__(self, scale_range: Union[tuple, list], p: float = 0.5):
+    def __init__(self, scale_range: Union[tuple, list], p: float = 0.5, **kwargs):
         self._range = scale_range
         self._p = p
 
@@ -159,8 +159,8 @@ class RandomScale:
         return data
 
 class RandomColorAdjust:
-    def __init__(self, brightness=32.0 / 255, saturation=0.5):
-        self._jitter = MSRandomColorAdjust(brightness=brightness, saturation=saturation)
+    def __init__(self, brightness=32.0 / 255, saturation=0.5, **kwargs):
+        self._jitter = MSRandomColorAdjust(brightness=brightness, saturation=saturation, **kwargs)
         self._pil = ToPIL()
 
     def __call__(self, data):

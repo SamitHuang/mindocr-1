@@ -96,7 +96,7 @@ class RandomCropWithBBox:
         crop_size: target size of the crop (resized and padded, if needed), preserves sides ratio.
         p: probability of the augmentation being applied to an image.
     """
-    def __init__(self, max_tries=10, min_crop_ratio=0.1, crop_size=(640, 640), p: float = 0.5):
+    def __init__(self, max_tries=10, min_crop_ratio=0.1, crop_size=(640, 640), p: float = 0.5, **kwargs):
         self._crop_size = crop_size
         self._ratio = min_crop_ratio
         self._max_tries = max_tries
@@ -209,7 +209,7 @@ class RandomCropWithMask(object):
 
 
 class BorderMap:
-    def __init__(self, shrink_ratio=0.4, thresh_min=0.3, thresh_max=0.7):
+    def __init__(self, shrink_ratio=0.4, thresh_min=0.3, thresh_max=0.7, **kwargs):
         self._thresh_min = thresh_min
         self._thresh_max = thresh_max
         self._dist_coef = 1 - shrink_ratio ** 2
@@ -279,7 +279,7 @@ class ShrinkBinaryMap:
     Making binary mask from detection data with ICDAR format.
     Typically following the process of class `MakeICDARData`.
     """
-    def __init__(self, min_text_size=8, shrink_ratio=0.4):
+    def __init__(self, min_text_size=8, shrink_ratio=0.4, **kwargs):
         self._min_text_size = min_text_size
         self._dist_coef = 1 - shrink_ratio ** 2
 
@@ -339,7 +339,10 @@ class DetResize(object):
                  limit_side_len=736,
                  force_divisable=True,
                  divisor=32,
-                 interpolation=cv2.INTER_LINEAR):
+                 interpolation=cv2.INTER_LINEAR,
+                 **kwargs,
+                 ):
+
 
         if target_size is not None:
             limit_type = None
@@ -352,6 +355,8 @@ class DetResize(object):
         self.interpolation = interpolation
         self.force_divisable = force_divisable
         self.divisor = divisor
+
+        self.is_train = kwargs.get('is_train', False)
 
         if limit_type in ['min', 'max']:
             keep_ratio = True
@@ -432,9 +437,16 @@ class DetResize(object):
 
         scale_h = resize_h / h
         scale_w = resize_w / w
+
+        # Only need to transform ground truth polygons in training for generating masks/maps. 
+        # For evaluation, we should not change the GT polygons. The metric with input of GT polygons and predicted polygons must be computed in the original image space for consistent comparison. 
         if 'polys' in data:
-            data['polys'][:, :, 0] = data['polys'][:, :, 0] * scale_w
-            data['polys'][:, :, 1] = data['polys'][:, :, 1] * scale_h
+            print('DetResize get GT polys: ', data['polys'])
+            if self.is_train:
+                data['polys'][:, :, 0] = data['polys'][:, :, 0] * scale_w
+                data['polys'][:, :, 1] = data['polys'][:, :, 1] * scale_h
+                print('DetResize transform GT polys to: ', data['polys'])
+
         data['shape_list'] = [h, w, scale_h, scale_w]
 
         return data
@@ -445,7 +457,7 @@ class GridResize(DetResize):
     Resize image to make it divisible by a specified factor exactly.
     Resize polygons correspondingly, if provided.
     """
-    def __init__(self, factor: int = 32):
+    def __init__(self, factor: int = 32, **kwargs):
         super().__init__(
                  target_size= None,
                  keep_ratio=False,
@@ -464,7 +476,7 @@ class ScalePadImage(DetResize):
     Args:
         target_size: [H, W] of the output image.
     """
-    def __init__(self, target_size: list):
+    def __init__(self, target_size: list, **kwargs):
        super().__init__(
                  target_size=target_size,
                  keep_ratio=True,
@@ -481,7 +493,7 @@ def expand_poly(poly, distance: float, joint_type=pyclipper.JT_ROUND) -> List[li
 
 
 class PSEGtDecode(object):
-    def __init__(self, kernel_num=7, min_shrink_ratio=0.4, min_shortest_edge=640):
+    def __init__(self, kernel_num=7, min_shrink_ratio=0.4, min_shortest_edge=640, **kwargs ):
         self.kernel_num = kernel_num
         self.min_shrink_ratio = min_shrink_ratio
         self.min_shortest_edge = min_shortest_edge
@@ -575,7 +587,7 @@ class ValidatePolygons:
     Args:
         min_area: minimum area below which newly clipped polygons considered as ignored.
     """
-    def __init__(self, min_area: float = 1.0):
+    def __init__(self, min_area: float = 1.0, **kwargs):
         self._min_area = min_area
         #self.fix_when_invalid = fix_when_invalid
 

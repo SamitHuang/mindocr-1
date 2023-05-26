@@ -1,6 +1,7 @@
 from typing import Tuple, Union, List
 import cv2
 import numpy as np
+import mindspore as ms
 from mindspore import Tensor
 from mindspore import nn
 from shapely.geometry import Polygon
@@ -15,28 +16,107 @@ class DetBasePostprocess:
     Base class for all text detection postprocessings.
 
     Args:
-        rescale_fields: name of fields to scale back to the shape of the original image.
+        box_type (str): text region representation type after postprocessing, options: ['quad', 'poly']  
+        rescale_fields (list): names of fields to rescale back to the shape of the original image.
     """
-    def __init__(self, rescale_fields: List[str] = None):
+    def __init__(self, 
+                 box_type='quad',
+                 rescale_fields: List[str] = ['polys']):
+
+        assert box_type in ['quad', 'poly'], f'box_type must be `quad` or `poly`, but found {box_type}'
         self._rescale_fields = rescale_fields
+        self.warned = False 
+        if self._rescale_fields is None:
+            print('WARNING: `rescale_filed` is None. Cannot rescale the predicted polygons to original image space') 
 
     @staticmethod
-    def _rescale_sample(sample: Union[List[np.ndarray], np.ndarray], shape: np.ndarray):
-        # shape: [h, w, scale_h, scale_w]
-        if isinstance(sample, np.ndarray):
-            result = np.round(sample * shape[:1:-1])
+    def _rescale_polygons(polygons: Union[List, np.ndarray], shape_list):
+        '''
+        polygon: in shape [num_polygons, num_points, 2]
+        shape_list: src_h, src_w, scale_h, scale_w 
+        '''
+        #src_h, src_w, scale_h, scale_w = shape_list
+        scale_w_h = shape_list[:1:-1]
+
+        print('D-- rescale input: ', polygons)
+        print('shape list: ', shape_list)
+        if isinstance(polygons, np.ndarray):
+            #polygons[:, :, 0] = np.round(polygons[:, :, 0] / scale_w) 
+            #polygons[:, :, 1] = np.round(polygons[:, :, 1] / scale_h) 
+            polygons = np.round(polygons / scale_w_h)
         else:
-            result = [np.round(s * shape[:1:-1]) for s in sample]
+            polygons = [np.round(poly / scale_w_h) for poly in polygons]
+
+        print('D-- rescale output: ', polygons)
+
+        return polygons
+
+    def rescale(self, result: dict, shape_list: np.ndarray) -> dict:
+        '''
+        Args:
+            result (dict) with keys for a data batch
+                polys:  np.ndarray of shape [batch_size, num_polys, num_points, 2]. batch_size is usually 1 to avoid dynamic shape issue.
+        '''
+
+        for field in self._rescale_fields:
+            assert field in result, f'Invalid field {field}. Found fields in intermidate postprocess result are {list(result.keys())}' 
+            for i, sample in enumerate(result[field]): 
+                if len(sample) > 0:
+                    result[field][i] = self._rescale_polygons(sample, shape_list[i]) 
 
         return result
 
-    def rescale(self, processed: dict, shapes: Union[Tensor, np.ndarray]) -> dict:
-        shapes = shapes.asnumpy() if isinstance(shapes, Tensor) else shapes
-        shapes[:, 2:] = 1 / shapes[:, 2:]   # reverse scale values from the dataloader
-        for field in self._rescale_fields:
-            processed[field] = [self._rescale_sample(sample, shape) for sample, shape in zip(processed[field], shapes)]
+    def process(self, 
+            pred: Union[ms.Tensor, Tuple[ms.Tensor], np.ndarray], 
+            shape_list: np.ndarray = None, 
+            **kwargs) -> dict:
+        '''
+        Core method to process network prediction. 
+        '''
+        raise NotImplementedError
 
-        return processed
+    def __call__(self, 
+            pred: Union[ms.Tensor, Tuple[ms.Tensor], np.ndarray], 
+            shape_list: Union[List, np.ndarray, ms.Tensor]=None, 
+            **kwargs) -> dict:
+        """
+        pred (Union[Tensor, Tuple[Tensor], np.ndarray]):
+            binary: text region segmentation map, with shape (N, 1, H, W)
+            thresh: [if exists] threshold prediction with shape (N, 1, H, W) (optional)
+            thresh_binary: [if exists] binarized with threshold, (N, 1, H, W) (optional)
+        shape_list: network input image shapes, (N, 4). These 4 values represent input image [h, w, scale_h, scale_w]
+        Returns:
+            result (dict) with keys:
+                polys: np.ndarray of shape (N, K, 4, 2) for the polygons of objective regions if region_type is 'quad'
+                scores: np.ndarray of shape (N, K), score for each box
+        """
+        
+        # 1. check input type. Covert shape_list to np.ndarray
+        if isinstance(shape_list, Tensor):
+            shape_list = shape_list.asnumpy()
+        elif isinstance(shape_list, List):
+            shape_list = np.array(shape_list, dtype='float32')
+        
+        if shape_list is not None:
+            assert len(shape_list) > 0 and len(shape_list[0])==4, f'The length of each element in shape_list must be 4 for [raw_img_h, raw_img_w, scale_h, scale_w]. But get shape list {shape_list}'
+        else:
+            #shape_list = [[pred.shape[2], pred.shape[3], 1.0, 1.0] for i in range(pred.shape[0])] # H, W
+            #shape_list = np.array(shape_list, dtype='float32')
+
+            print('WARNING: `shape_list` is None in postprocessing. Cannot rescale the prediction result to original image space, which can lead to inaccraute evaluatoin. You may add `shape_list` to `output_columns` list under eval section in yaml config file to address it')
+            self.warned = True
+
+        # 2. core process
+        result = self.process(pred, shape_list, **kwargs)    
+
+        # 3. rescale processing results if shape_list is given 
+        if shape_list is not None and self._rescale_fields is not None:
+            #print('Before recscale: ', result['polys'])
+            #print('Shape list', shape_list)
+            result = self.rescale(result, shape_list)
+            #print('Postprocess rescaled the result to ', result['polys'])
+
+        return result
 
 
 class DBPostprocess(DetBasePostprocess):
@@ -54,8 +134,9 @@ class DBPostprocess(DetBasePostprocess):
         rescale_fields: name of fields to scale back to the shape of the original image.
     """
     def __init__(self, binary_thresh: float = 0.3, box_thresh: float = 0.7, max_candidates: int = 1000,
-                 expand_ratio: float = 1.5,  box_type='quad', pred_name: str = 'binary', rescale_fields: List[str] = None):
-        super().__init__(rescale_fields)
+                 expand_ratio: float = 1.5,  box_type='quad', pred_name: str = 'binary', rescale_fields: List[str] = ['polys']
+                 ):
+        super().__init__(box_type, rescale_fields)
 
         self._min_size = 3
         self._binary_thresh = binary_thresh
@@ -66,14 +147,16 @@ class DBPostprocess(DetBasePostprocess):
         self._name = pred_name
         self._names = {'binary': 0, 'thresh': 1, 'thresh_binary': 2}
 
-    def __call__(self, pred: Union[Tensor, Tuple[Tensor], np.ndarray], shapes: Union[Tensor, np.ndarray] = None,
-                 **kwargs) -> dict:
+    def process(self, 
+                pred: Union[Tensor, Tuple[Tensor], np.ndarray], 
+                shape_list: Union[Tensor, np.ndarray] = None,
+                **kwargs) -> dict:
         """
         pred (Union[Tensor, Tuple[Tensor], np.ndarray]):
             binary: text region segmentation map, with shape (N, 1, H, W)
             thresh: [if exists] threshold prediction with shape (N, 1, H, W) (optional)
             thresh_binary: [if exists] binarized with threshold, (N, 1, H, W) (optional)
-        shapes: network input image shapes, (N, 4). These 4 values represent input image [h, w, scale_h, scale_w]
+        shape_list: network input image shapes, (N, 4). These 4 values represent input image [h, w, scale_h, scale_w]
         Returns:
             result (dict) with keys:
                 polys: np.ndarray of shape (N, K, 4, 2) for the polygons of objective regions if region_type is 'quad'
@@ -87,11 +170,7 @@ class DBPostprocess(DetBasePostprocess):
 
         segmentation = pred >= self._binary_thresh
 
-        if shapes is not None:  # clip polygons within the visible region
-            shapes = shapes.asnumpy() if isinstance(shapes, Tensor) else shapes
-            dest_size = shapes[:1:-1] - 1
-        else:                   # clip polygons within the prediction shape otherwise
-            dest_size = np.array(pred.shape[:0:-1]) - 1
+        dest_size = np.array(pred.shape[:0:-1]) - 1
 
         polys, scores = [], []
         for pr, segm, size in zip(pred, segmentation, dest_size):
@@ -100,8 +179,6 @@ class DBPostprocess(DetBasePostprocess):
             scores.append(sample_scores)
 
         output = {'polys': polys, 'scores': scores}
-        if self._rescale_fields:
-            output = self.scale(output, shapes)
             
         return output
 
