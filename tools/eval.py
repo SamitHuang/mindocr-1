@@ -6,8 +6,8 @@ import os
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(__dir__, "..")))
 
+from tools.arg_parser import parse_args_and_config
 import yaml
-import argparse
 from addict import Dict
 
 import mindspore as ms
@@ -90,21 +90,13 @@ def main(cfg):
         print('Performance: ', measures)
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description='Evaluation Config', add_help=False)
-    parser.add_argument('-c', '--config', type=str, default='',
-                        help='YAML config file specifying default arguments (default='')')
-    args = parser.parse_args()
-
-    return args
-
-
 if __name__ == '__main__':
     # argpaser
-    args = parse_args()
-    yaml_fp = args.config
-    with open(yaml_fp) as fp:
-        config = yaml.safe_load(fp)
+    #args = parse_args()
+    #yaml_fp = args.config
+    #with open(yaml_fp) as fp:
+    #    config = yaml.safe_load(fp)
+    args, config = parse_args_and_config()
     config = Dict(config)
 
     #print(config)

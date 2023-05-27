@@ -140,6 +140,7 @@ class RandomScale:
     def __init__(self, scale_range: Union[tuple, list], p: float = 0.5, **kwargs):
         self._range = scale_range
         self._p = p
+        self.is_train = kwargs.get('is_train', True)
 
     def __call__(self, data: dict):
         """
@@ -153,14 +154,19 @@ class RandomScale:
         if random.random() < self._p:
             scale = np.random.uniform(*self._range)
             data['image'] = cv2.resize(data['image'], dsize=None, fx=scale, fy=scale)
-
             if 'polys' in data:
-                data['polys'] *= scale
+                if self.is_train:
+                    data['polys'] *= scale
+                else:
+                    raise ValueError('Test time augmentation is not supported for detection. RandomScale should not be used in test time.')
+
         return data
 
 class RandomColorAdjust:
     def __init__(self, brightness=32.0 / 255, saturation=0.5, **kwargs):
-        self._jitter = MSRandomColorAdjust(brightness=brightness, saturation=saturation, **kwargs)
+        contrast  = kwargs.get('contrast', (1,1)) 
+        hue = kwargs.get('hue', (0, 0))
+        self._jitter = MSRandomColorAdjust(brightness=brightness, saturation=saturation, contrast=contrast, hue=hue)
         self._pil = ToPIL()
 
     def __call__(self, data):

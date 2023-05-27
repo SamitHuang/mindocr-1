@@ -35,19 +35,15 @@ class DetBasePostprocess:
         polygon: in shape [num_polygons, num_points, 2]
         shape_list: src_h, src_w, scale_h, scale_w 
         '''
-        #src_h, src_w, scale_h, scale_w = shape_list
         scale_w_h = shape_list[:1:-1]
 
-        print('D-- rescale input: ', polygons)
-        print('shape list: ', shape_list)
+        #print('DEBUG: rescale input: ', polygons, 'shape list: ', shape_list)
         if isinstance(polygons, np.ndarray):
-            #polygons[:, :, 0] = np.round(polygons[:, :, 0] / scale_w) 
-            #polygons[:, :, 1] = np.round(polygons[:, :, 1] / scale_h) 
             polygons = np.round(polygons / scale_w_h)
         else:
             polygons = [np.round(poly / scale_w_h) for poly in polygons]
 
-        print('D-- rescale output: ', polygons)
+        #print('DEBUG: rescale output: ', polygons)
 
         return polygons
 

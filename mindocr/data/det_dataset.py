@@ -71,7 +71,7 @@ class DetDataset(BaseDataset):
         # create transform
         if transform_pipeline is not None:
             global_config = dict(is_train=is_train)
-            self.transforms = create_transforms(transform_pipeline, global_config=global_config)
+            self.transforms = create_transforms(transform_pipeline, global_config)
         else:
             raise ValueError('No transform pipeline is specified!')
 

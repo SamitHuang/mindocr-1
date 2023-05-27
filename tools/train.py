@@ -8,9 +8,10 @@ import shutil
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(__dir__, "..")))
 
-from tools.arg_parser import parse_args
+from tools.arg_parser import parse_args_and_config
 
-args = parse_args()
+#args = parse_args()
+args, config = parse_args_and_config()
 
 # modelarts
 from tools.modelarts_adapter.modelarts import modelarts_setup
@@ -207,14 +208,11 @@ def main(cfg):
 
 if __name__ == '__main__':
     # load and archive yaml config
-    yaml_fp = args.config
-    with open(yaml_fp) as fp:
-        config = yaml.safe_load(fp)
     config = Dict(config)
 
     ckpt_save_dir = config.train.ckpt_save_dir
     os.makedirs(ckpt_save_dir, exist_ok=True)
-    shutil.copyfile(yaml_fp, os.path.join(ckpt_save_dir, 'train_config.yaml'))
+    shutil.copyfile(args.config, os.path.join(ckpt_save_dir, 'train_config.yaml'))
 
     # data sync for modelarts
     if args.enable_modelarts:

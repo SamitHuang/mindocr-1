@@ -4,6 +4,7 @@ transforms for text detection tasks.
 import warnings
 from typing import List
 import math
+import random
 
 import json
 import cv2
@@ -440,14 +441,17 @@ class DetResize(object):
 
         # Only need to transform ground truth polygons in training for generating masks/maps. 
         # For evaluation, we should not change the GT polygons. The metric with input of GT polygons and predicted polygons must be computed in the original image space for consistent comparison. 
-        if 'polys' in data:
-            print('DetResize get GT polys: ', data['polys'])
-            if self.is_train:
+        if 'polys' in data and self.is_train:
                 data['polys'][:, :, 0] = data['polys'][:, :, 0] * scale_w
                 data['polys'][:, :, 1] = data['polys'][:, :, 1] * scale_h
-                print('DetResize transform GT polys to: ', data['polys'])
+                #print('transform GT polys to: ', data['polys'])
 
-        data['shape_list'] = [h, w, scale_h, scale_w]
+        if 'shape_list' not in data: 
+            src_h, src_w = data.get('raw_img_shape', (h, w))
+            data['shape_list'] = [src_h, src_w, scale_h, scale_w]
+        else:
+            data['shape_list'][2] = data['shape_list'][2] * scale_h
+            data['shape_list'][3] = data['shape_list'][3] * scale_h
 
         return data
 
