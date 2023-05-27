@@ -9,7 +9,7 @@ from shapely.geometry import Polygon
 from .det_base_postprocess import DetBasePostprocess
 from ..data.transforms.det_transforms import expand_poly
 
-__all__ = ['DBPostprocess']
+__all__ = ["DBPostprocess"]
 
 
 class DBPostprocess(DetBasePostprocess):
@@ -26,9 +26,17 @@ class DBPostprocess(DetBasePostprocess):
         pred_name: heatmap's name used for polygons extraction.
         rescale_fields: name of fields to scale back to the shape of the original image.
     """
-    def __init__(self, binary_thresh: float = 0.3, box_thresh: float = 0.7, max_candidates: int = 1000,
-                 expand_ratio: float = 1.5,  box_type='quad', pred_name: str = 'binary', rescale_fields: List[str] = ['polys']
-                 ):
+
+    def __init__(
+        self,
+        binary_thresh: float = 0.3,
+        box_thresh: float = 0.7,
+        max_candidates: int = 1000,
+        expand_ratio: float = 1.5,
+        box_type="quad",
+        pred_name: str = "binary",
+        rescale_fields: List[str] = ["polys"],
+    ):
         super().__init__(box_type, rescale_fields)
 
         self._min_size = 3
@@ -36,13 +44,13 @@ class DBPostprocess(DetBasePostprocess):
         self._box_thresh = box_thresh
         self._max_candidates = max_candidates
         self._expand_ratio = expand_ratio
-        self._out_poly = (box_type == 'poly') 
+        self._out_poly = box_type == "poly"
         self._name = pred_name
-        self._names = {'binary': 0, 'thresh': 1, 'thresh_binary': 2}
+        self._names = {"binary": 0, "thresh": 1, "thresh_binary": 2}
 
-    def postprocess(self, 
-                pred: Union[Tensor, Tuple[Tensor], np.ndarray], 
-                **kwargs) -> dict:
+    def postprocess(
+        self, pred: Union[Tensor, Tuple[Tensor], np.ndarray], **kwargs
+    ) -> dict:
         """
         Args:
             pred (Union[Tensor, Tuple[Tensor], np.ndarray]):
@@ -70,19 +78,23 @@ class DBPostprocess(DetBasePostprocess):
             polys.append(sample_polys)
             scores.append(sample_scores)
 
-        output = {'polys': polys, 'scores': scores}
-            
+        output = {"polys": polys, "scores": scores}
+
         return output
 
-    def _extract_preds(self, pred: np.ndarray, bitmap: np.ndarray, dest_size: np.ndarray):
-        outs = cv2.findContours(bitmap.astype(np.uint8), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    def _extract_preds(
+        self, pred: np.ndarray, bitmap: np.ndarray, dest_size: np.ndarray
+    ):
+        outs = cv2.findContours(
+            bitmap.astype(np.uint8), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE
+        )
         if len(outs) == 3:  # FIXME: update to OpenCV 4.x and delete this
             _, contours, _ = outs[0], outs[1], outs[2]
         elif len(outs) == 2:
             contours, _ = outs[0], outs[1]
 
         polys, scores = [], []
-        for contour in contours[:self._max_candidates]:
+        for contour in contours[: self._max_candidates]:
             contour = contour.squeeze(1)
             score = self._calc_score(pred, bitmap, contour)
             if score < self._box_thresh:
@@ -99,7 +111,11 @@ class DBPostprocess(DetBasePostprocess):
                     continue
 
             poly = Polygon(points)
-            poly = np.array(expand_poly(points, distance=poly.area * self._expand_ratio / poly.length))
+            poly = np.array(
+                expand_poly(
+                    points, distance=poly.area * self._expand_ratio / poly.length
+                )
+            )
             if self._out_poly and len(poly) > 1:
                 continue
             poly = poly.reshape(-1, 2)
@@ -153,9 +169,7 @@ class DBPostprocess(DetBasePostprocess):
             index_2 = 3
             index_3 = 2
 
-        box = [
-            points[index_1], points[index_2], points[index_3], points[index_4]
-        ]
+        box = [points[index_1], points[index_2], points[index_3], points[index_4]]
         return box, min(bounding_box[1])
 
     @staticmethod
@@ -163,9 +177,16 @@ class DBPostprocess(DetBasePostprocess):
         """
         calculates score (mean value) of a prediction inside a given contour.
         """
-        min_vals = np.clip(np.floor(np.min(contour, axis=0)), 0, np.array(pred.shape[::-1]) - 1).astype(np.int32)
-        max_vals = np.clip(np.ceil(np.max(contour, axis=0)), 0, np.array(pred.shape[::-1]) - 1).astype(np.int32)
+        min_vals = np.clip(
+            np.floor(np.min(contour, axis=0)), 0, np.array(pred.shape[::-1]) - 1
+        ).astype(np.int32)
+        max_vals = np.clip(
+            np.ceil(np.max(contour, axis=0)), 0, np.array(pred.shape[::-1]) - 1
+        ).astype(np.int32)
 
-        return cv2.mean(pred[min_vals[1]:max_vals[1] + 1, min_vals[0]:max_vals[0] + 1],
-                        mask[min_vals[1]:max_vals[1] + 1, min_vals[0]:max_vals[0] + 1].astype(np.uint8))[0]
-
+        return cv2.mean(
+            pred[min_vals[1] : max_vals[1] + 1, min_vals[0] : max_vals[0] + 1],
+            mask[min_vals[1] : max_vals[1] + 1, min_vals[0] : max_vals[0] + 1].astype(
+                np.uint8
+            ),
+        )[0]

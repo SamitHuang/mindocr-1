@@ -9,15 +9,23 @@ from shapely.geometry import Polygon
 from .det_base_postprocess import DetBasePostprocess
 from ..data.transforms.det_transforms import expand_poly
 
-__all__ = ['PSEPostprocess']
+__all__ = ["PSEPostprocess"]
 
 
 class PSEPostprocess(DetBasePostprocess):
-    def __init__(self, binary_thresh=0.5, box_thresh=0.85, min_area=16,
-                 box_type='quad', scale=4, rescale_fields=['polys']):
+    def __init__(
+        self,
+        binary_thresh=0.5,
+        box_thresh=0.85,
+        min_area=16,
+        box_type="quad",
+        scale=4,
+        rescale_fields=["polys"],
+    ):
         super().__init__(box_type, rescale_fields)
 
         from .pse import pse
+
         self._binary_thresh = binary_thresh
         self._box_thresh = box_thresh
         self._min_area = min_area
@@ -31,13 +39,13 @@ class PSEPostprocess(DetBasePostprocess):
         self._pse = pse
 
     def postprocess(self, pred, **kwargs):  # pred: N 7 H W
-        '''
+        """
         Args:
             pred (Tensor): network prediction with shape [BS, C, H, W]
-        '''
+        """
         if not isinstance(pred, Tensor):
             pred = Tensor(pred)
-        
+
         pred = self._interpolate(pred, scale_factor=4 // self._scale)
         score = self._sigmoid(pred[:, 0, :, :])
 
@@ -50,12 +58,13 @@ class PSEPostprocess(DetBasePostprocess):
         kernels = kernels.asnumpy().astype(np.uint8)
         poly_list, score_list = [], []
         for batch_idx in range(pred.shape[0]):
-            boxes, scores = self._boxes_from_bitmap(score[batch_idx],
-                                                    kernels[batch_idx])
+            boxes, scores = self._boxes_from_bitmap(
+                score[batch_idx], kernels[batch_idx]
+            )
             poly_list.append(boxes)
             score_list.append(scores)
 
-        return {'polys': poly_list, 'scores': score_list}
+        return {"polys": poly_list, "scores": score_list}
 
     def _boxes_from_bitmap(self, score, kernels):
         label = self._pse(kernels, self._min_area)
@@ -77,12 +86,13 @@ class PSEPostprocess(DetBasePostprocess):
                 label[ind] = 0
                 continue
 
-            if self._box_type == 'quad':
+            if self._box_type == "quad":
                 rect = cv2.minAreaRect(points)
                 bbox = cv2.boxPoints(rect)
             else:
                 raise NotImplementedError(
-                    f"The value of param 'box_type' can only be 'quad', but got '{self._box_type}'.")
+                    f"The value of param 'box_type' can only be 'quad', but got '{self._box_type}'."
+                )
             boxes.append(bbox)
             scores.append(score_i)
 
