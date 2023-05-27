@@ -99,13 +99,14 @@ def main(cfg):
     )
     info_seg = "=" * 40
     det_spec = f"Allow rescaling polygons for Det postprocess: {allow_postprocess_rescale}" if cfg.model.type=='det' else ""
+    rec_spec = f"Character dict path: {cfg.common.character_dict_path}\nUse space char: {cfg.common.use_space_char}\nNum classes: {cfg.common.num_classes}" if cfg.model.type=='rec' else ''
     logger.info(
         f"\n{info_seg}\n"
         f"Model: {model_name}\n"
         f"AMP level: {amp_level}\n"
         f"Num batches: {num_batches}\n"
         f"Batch size: {cfg.eval.loader.batch_size}\n"
-        f"{det_spec}\n"
+        f"{det_spec}{rec_spec}\n"
         f"{info_seg}\n"
         f"\nStart evaluating..."
     )
