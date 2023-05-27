@@ -24,6 +24,7 @@ from mindocr.utils.logger import get_logger
 
 def main(cfg):
     # env init
+    #ms.set_context(mode=cfg.system.mode, device_id=7)
     ms.set_context(mode=cfg.system.mode)
     if cfg.system.distribute:
         init()
