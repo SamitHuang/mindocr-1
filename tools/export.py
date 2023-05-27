@@ -22,8 +22,8 @@ from mindocr import list_models, build_model
 import numpy as np
 
 
-def export(name, task='rec', local_ckpt_path="", save_dir=""):
-    ms.set_context(mode=ms.GRAPH_MODE) #, device_target='Ascend')
+def export(name, task="rec", local_ckpt_path="", save_dir=""):
+    ms.set_context(mode=ms.GRAPH_MODE)  # , device_target='Ascend')
     if local_ckpt_path:
         net = build_model(name, pretrained=False, ckpt_load_path=local_ckpt_path)
     else:
@@ -31,7 +31,7 @@ def export(name, task='rec', local_ckpt_path="", save_dir=""):
     net.set_train(False)
 
     # TODO: extend input shapes for more models
-    if task == 'rec':
+    if task == "rec":
         c, h, w = 3, 32, 100
     else:
         c, h, w = 3, 736, 1280
@@ -39,10 +39,10 @@ def export(name, task='rec', local_ckpt_path="", save_dir=""):
     bs = 1
     x = ms.Tensor(np.ones([bs, c, h, w]), dtype=ms.float32)
 
-    output_path = os.path.join(save_dir, name) + '.mindir'
-    ms.export(net, x, file_name=output_path, file_format='MINDIR')
+    output_path = os.path.join(save_dir, name) + ".mindir"
+    ms.export(net, x, file_name=output_path, file_format="MINDIR")
 
-    print(f'=> Finish exporting {name} to {output_path}')
+    print(f"=> Finish exporting {name} to {output_path}")
 
 
 def str2bool(v):
@@ -59,34 +59,40 @@ def str2bool(v):
 def check_args(args):
     if args.local_ckpt_path:  # load local ckpt
         if not args.model_name:
-            raise ValueError("Arg 'model_name' is empty. Please set 'model_name' if 'local_ckpt_path' is not None.")
+            raise ValueError(
+                "Arg 'model_name' is empty. Please set 'model_name' if 'local_ckpt_path' is not None."
+            )
         if args.model_name not in list_models():
-            raise ValueError(f"Invalid 'model_name': {args.model_name}. 'model_name' must be one of names in {list_models()}.")
+            raise ValueError(
+                f"Invalid 'model_name': {args.model_name}. 'model_name' must be one of names in {list_models()}."
+            )
         if not os.path.isfile(args.local_ckpt_path):
             raise ValueError(f"No such ckpt file in this path: {args.local_ckpt_path}.")
     else:  # download online ckpt
         if args.model_name and args.model_name not in list_models():
-            raise ValueError(f"Invalid 'model_name': {args.model_name}. 'model_name' must be empty or one of names in {list_models()}.")
+            raise ValueError(
+                f"Invalid 'model_name': {args.model_name}. 'model_name' must be empty or one of names in {list_models()}."
+            )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser("Convert model checkpoint to mindir format.")
     parser.add_argument(
-        '--model_name',
+        "--model_name",
         type=str,
         default="",
-        help=f'Name of the model to convert. Available choices: {list_models()}. '
-             'If empty, all supported models will be converted.')
+        help=f"Name of the model to convert. Available choices: {list_models()}. "
+        "If empty, all supported models will be converted.",
+    )
     parser.add_argument(
-        '--local_ckpt_path',
+        "--local_ckpt_path",
         type=str,
         default="",
-        help='Path to a local checkpoint. If set, export a specific model by loading local ckpt. Otherwise, export all models or a specific model by downloading online ckpt.')
+        help="Path to a local checkpoint. If set, export a specific model by loading local ckpt. Otherwise, export all models or a specific model by downloading online ckpt.",
+    )
     parser.add_argument(
-        '--save_dir',
-        type=str,
-        default="",
-        help='Dir to save the exported model')
+        "--save_dir", type=str, default="", help="Dir to save the exported model"
+    )
 
     args = parser.parse_args()
     check_args(args)
@@ -97,7 +103,7 @@ if __name__ == '__main__':
         model_names = [args.model_name]
 
     for n in model_names:
-        task = 'rec'
-        if 'db' in n or 'east' in n:
-            task = 'det'
+        task = "rec"
+        if "db" in n or "east" in n:
+            task = "det"
         export(n, task, args.local_ckpt_path, args.save_dir)

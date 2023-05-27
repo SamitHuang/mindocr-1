@@ -41,7 +41,9 @@ def main(cfg):
     is_main_device = rank_id in [None, 0]
 
     logger = get_logger(
-        log_dir=cfg.train.ckpt_save_dir or "./", rank=rank_id, log_fn=f"log_eval_{rank_id}.txt"
+        log_dir=cfg.train.ckpt_save_dir or "./",
+        rank=rank_id,
+        log_fn=f"log_eval_{rank_id}.txt",
     )
 
     # load dataset
@@ -98,8 +100,16 @@ def main(cfg):
         else f"{cfg.model.backbone.name}-{cfg.model.neck.name}-{cfg.model.head.name}"
     )
     info_seg = "=" * 40
-    det_spec = f"Allow rescaling polygons for Det postprocess: {allow_postprocess_rescale}" if cfg.model.type=='det' else ""
-    rec_spec = f"Character dict path: {cfg.common.character_dict_path}\nUse space char: {cfg.common.use_space_char}\nNum classes: {cfg.common.num_classes}" if cfg.model.type=='rec' else ''
+    det_spec = (
+        f"Allow rescaling polygons for Det postprocess: {allow_postprocess_rescale}"
+        if cfg.model.type == "det"
+        else ""
+    )
+    rec_spec = (
+        f"Character dict path: {cfg.common.character_dict_path}\nUse space char: {cfg.common.use_space_char}\nNum classes: {cfg.common.num_classes}"
+        if cfg.model.type == "rec"
+        else ""
+    )
     logger.info(
         f"\n{info_seg}\n"
         f"Model: {model_name}\n"
