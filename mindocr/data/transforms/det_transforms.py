@@ -427,12 +427,13 @@ class DetResize(object):
 
         if allow_padding and self.padding:
             if self.target_size and (tar_h >= resize_h and tar_w >= resize_w):
+                # do padding
                 padded_img = np.zeros((tar_h, tar_w, 3), dtype=np.uint8)
                 padded_img[:resize_h, :resize_w, :] = resized_img
                 data['image'] = padded_img
             else:
-                raise ValueError(
-                    f'`target_size` must be set to be not smaller than (resize_h, resize_w) for padding, but found {self.target_size}')
+                print(
+                    f'WARNING: Image shape after resize is ({resize_h}, {resize_w}), which is larger than target_size {self.target_size}. Skip padding for the current image. You may disable `force_divisable` to avoid this warning.')
         else:
             data['image'] = resized_img
 

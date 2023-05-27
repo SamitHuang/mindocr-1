@@ -88,7 +88,7 @@ DBNet may generate inaccurate or discrete bounding boxes.
 
 | **Model**         | **Context**    | **Backbone** | **Pretrained** | **Recall** | **Precision** | **F-score** | **Train T.** | **Throughput** | **Recipe**                  | **Download**                                                                                                                                                                                         |
 |-------------------|----------------|--------------|----------------|------------|---------------|-------------|--------------|----------------|-----------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| DBNet (ours)      | D910x1-MS2.0-G | ResNet-50    | SynthText       | 82.47%     | 87.75%        | 85.03%      | 13.3 s/epoch  | 51.1 img/s      | [yaml](db_r50_td500.yaml) | [ckpt](https://download.mindspore.cn/toolkits/mindocr/dbnet/dbnet_resnet50_td500-0d12b5e8.ckpt)  |
+| DBNet (ours)      | D910x1-MS2.0-G | ResNet-50    | SynthText       | 83.85%     | 87.77%        | 85.76%      | 13.3 s/epoch  | 51.1 img/s      | [yaml](db_r50_td500.yaml) | [ckpt](https://download.mindspore.cn/toolkits/mindocr/dbnet/dbnet_resnet50_td500-0d12b5e8.ckpt)  |
 </div>
 
 > MSRA-TD500 dataset has 300 training images and 200 testing images, reference paper [Real-time Scene Text Detection with Differentiable Binarization](https://arxiv.org/abs/1911.08947), we trained using an extra 400 traning images from HUST-TR400. You can down all [dataset](https://paddleocr.bj.bcebos.com/dataset/TD_TR.tar) for training.

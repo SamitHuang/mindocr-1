@@ -36,6 +36,7 @@ def _parse_options(opts: list):
     if not opts:
         return options
     for opt_str in opts:
+        assert '=' in opt_str, 'Invalid option {}. A valid option must be in the format of \{key_name\}=\{value\}'.format(opt_str)
         k, v = opt_str.strip().split('=')
         options[k] = yaml.load(v, Loader=yaml.Loader)
     #print('Parsed options: ', options)
@@ -81,25 +82,9 @@ def parse_args_and_config(args=None):
     
     if args.opt:
         options = _parse_options(args.opt)
-
-    cfg = _merge_options(cfg, options)
+        cfg = _merge_options(cfg, options)
 	
 	# TODO: check whether modelarts requires to install addict
     #cfg = Dict(cfg)
 
     return args, cfg
-
-
-if __name__ == '__main__':
-    args = parse_args()
-    print(args.opt)
-    options = _parse_options(args.opt)
-    print(options)
-
-    # merge options to args
-
-    print(vars(args).keys())
-    for k, v in args._get_kwargs():
-        print(k, v)
-
-
