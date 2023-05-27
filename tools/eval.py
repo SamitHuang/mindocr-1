@@ -77,6 +77,10 @@ def main(cfg):
                     )
 
     # log
+    if cfg.model.type == 'det':
+        if 'shape_list' not in cfg.eval.dataset.output_columns:
+            print("WARNING: `shape_list` is NOT found in yaml config, which is used to rescale postprocessing result back to orginal image space for detection. Please add it to `eval.dataset.output_columns` for a fair evaluation.")
+
     print('='*40)
     print(f'Num batches: {num_batches}')
     if 'name' in cfg.model:

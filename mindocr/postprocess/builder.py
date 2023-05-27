@@ -1,11 +1,13 @@
-from .det_postprocess import *
+from .det_db_postprocess import *
+from .det_pse_postprocess import *
 from .rec_postprocess import *
-from . import det_postprocess
+from . import det_db_postprocess
+from . import det_pse_postprocess
 from . import rec_postprocess
 
 __all__ = ['build_postprocess']
 
-supported_postprocess = det_postprocess.__all__ + rec_postprocess.__all__ 
+supported_postprocess = det_db_postprocess.__all__ + det_pse_postprocess.__all__ +  rec_postprocess.__all__ 
 
 def build_postprocess(config: dict):
     """
