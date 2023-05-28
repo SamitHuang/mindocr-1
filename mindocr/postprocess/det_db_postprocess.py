@@ -48,7 +48,7 @@ class DBPostprocess(DetBasePostprocess):
         self._name = pred_name
         self._names = {"binary": 0, "thresh": 1, "thresh_binary": 2}
 
-    def postprocess(
+    def _postprocess(
         self, pred: Union[Tensor, Tuple[Tensor], np.ndarray], **kwargs
     ) -> dict:
         """
@@ -62,8 +62,8 @@ class DBPostprocess(DetBasePostprocess):
 
 		Return:
             postprocessing result as a dict with keys:
-                polys (list): predicted polygons on the **transformed** (i.e. resized normally) image space, of shape (batch_size, num_polygons, num_points, 2). If `box_type` is 'quad', num_points=4.
-                scores (np.ndarray): of shape (batch_size, num_polygons), confidene for each predicted text box on each input image
+                - polys (List[List[np.ndarray]): predicted polygons on the **transformed** (i.e. resized normally) image space, of shape (batch_size, num_polygons, num_points, 2). If `box_type` is 'quad', num_points=4.
+                - scores (np.ndarray): confidence scores for the predicted polygons, shape (batch_size, num_polygons) 
         """
         if isinstance(pred, tuple):
             pred = pred[self._names[self._name]]

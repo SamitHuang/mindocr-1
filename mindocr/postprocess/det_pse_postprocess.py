@@ -38,7 +38,7 @@ class PSEPostprocess(DetBasePostprocess):
         self._rescale_fields = rescale_fields
         self._pse = pse
 
-    def postprocess(self, pred, **kwargs):  # pred: N 7 H W
+    def _postprocess(self, pred, **kwargs):  # pred: N 7 H W
         """
         Args:
             pred (Tensor): network prediction with shape [BS, C, H, W]

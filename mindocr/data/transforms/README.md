@@ -1,4 +1,4 @@
-## Guideline for developing your transformation
+## Guideline for Developing Your Transformation
 
 ### Writing Guideline
 
@@ -35,3 +35,7 @@ class ToCHWImage(object):
 Please add unit test in `tests/ut/transforms` for the written transformation and try to cover different cases (inputs and settings).
 
 Please visually check the correctness of the transformation on image and annotation using the jupyter notebook. See `transform_tutorial.ipynb`.
+
+
+### Important Notes
+1. For spatial transformation operaions that will be used in text detection inference or evaluation (e.g. determinstic resize, scale), please record the space transformation information in `shape_list`. Otherwise, the postprocessing method won't be able to map the results back to the orignal image space. On how to record `shape_list`, please refer to [DetResize](./det_transforms.py).

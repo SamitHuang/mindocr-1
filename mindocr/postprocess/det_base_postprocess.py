@@ -31,23 +31,23 @@ class DetBasePostprocess:
             )
 
 
-    def postprocess(
+    def _postprocess(
         self, pred: Union[ms.Tensor, Tuple[ms.Tensor], np.ndarray], **kwargs
     ) -> dict:
         '''
         Postprocess network prediction to get text boxes on the transformed image space (which will be rescaled back to original image space in __call__ function)
 
         Args:
-            pred: network prediction
+            pred: network prediction for input batch data, shape [batch_size, ...]
 
         Return:
             postprocessing result as a dict with keys:
-                polys (list): predicted polygons on the **transformed** (i.e. resized normally) image space, of shape (batch_size, num_polygons, num_points, 2). If `box_type` is 'quad', num_points=4.
-                scores (np.ndarray): of shape (batch_size, num_polygons), confidene for each predicted text box on each input image
+                - polys (List[List[np.ndarray]): predicted polygons on the **transformed** (i.e. resized normally) image space, of shape (batch_size, num_polygons, num_points, 2). If `box_type` is 'quad', num_points=4.
+                - scores (np.ndarray): confidence scores for the predicted polygons, shape (batch_size, num_polygons) 
 
         Notes:
-        - Please cast `pred` to the type you need in your implementation. Some postprocesssing steps use ops from mindspore.nn and prefer Tensor type, while some steps prefer np.ndarray type required in other libraries.
-        - This function should **NOT round** the text box `polys` to integer in return, because they will be recaled (in __call__()) later. Rounding early will cause larger error in polygon rescaling and may degrade the evaluation performance slightly, especially on small datasets. Please keep the orginal float precision for the returned `polys`.
+            - Please cast `pred` to the type you need in your implementation. Some postprocesssing steps use ops from mindspore.nn and prefer Tensor type, while some steps prefer np.ndarray type required in other libraries.
+            - `_postprocess()` should **NOT round** the text box `polys` to integer in return, because they will be recaled and then rounded in the end. Rounding early will cause larger error in polygon rescaling and results in **evaluation performance degradation**, especially on small datasets.
         '''
         raise NotImplementedError
 
@@ -62,13 +62,13 @@ class DetBasePostprocess:
         Execution entry for postprocessing, which postprocess network prediction on the transformed image space to get text boxes and then rescale them back to the original image space.
 
         Args:
-            pred (Union[Tensor, Tuple[Tensor], np.ndarray]): network prediction
-            shape_list (Union[List, np.ndarray, ms.Tensor]): image shape and scale info, shape [batch_size, 4]. Each internal array is [src_h, src_w, scale_h, scale_w], where src_h and src_w are height and width of the original image, and scale_h and scale_w are their scale ratio during image resizing.
+            pred (Union[Tensor, Tuple[Tensor], np.ndarray]): network prediction for input batch data, shape [batch_size, ...]
+            shape_list (Union[List, np.ndarray, ms.Tensor]): shape and scale info for each image in the batch, shape [batch_size, 4]. Each internal array is [src_h, src_w, scale_h, scale_w], where src_h and src_w are height and width of the original image, and scale_h and scale_w are their scale ratio during image resizing.
 
         Returns:
-            postprocessing result as a dict with keys:
-                polys (list): predicted polygons mapped on the **original** image space, of shape (batch_size, num_polygons, num_points, 2). If `box_type` is 'quad', num_points=4.
-                scores (np.ndarray): of shape (batch_size, num_polygons), confidene for each predicted text box on each input image
+            detection result as a dict with keys:
+                - polys (List[List[np.ndarray]): predicted polygons mapped on the **original** image space, shape [batch_size, num_polygons, num_points, 2]. If `box_type` is 'quad', num_points=4, and the internal np.ndarray is of shape [4, 2]
+                - scores (np.ndarray): confidence scores for the predicted polygons, shape (batch_size, num_polygons) 
         """
 
         # 1. Check input type. Covert shape_list to np.ndarray
@@ -91,7 +91,7 @@ class DetBasePostprocess:
             self.warned = True
 
         # 2. Core process
-        result = self.postprocess(pred, **kwargs)
+        result = self._postprocess(pred, **kwargs)
 
         # 3. Rescale processing results
         if shape_list is not None and self._rescale_fields is not None:
