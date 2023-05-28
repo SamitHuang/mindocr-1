@@ -30,65 +30,27 @@ class DetBasePostprocess:
                 "WARNING: `rescale_filed` is None. Cannot rescale the predicted polygons to original image space"
             )
 
+
     def postprocess(
         self, pred: Union[ms.Tensor, Tuple[ms.Tensor], np.ndarray], **kwargs
     ) -> dict:
         '''
-        Postprocess network prediction to get text boxes on the transformed image space (which will be rescaled back to original image space in __call__ function) 
+        Postprocess network prediction to get text boxes on the transformed image space (which will be rescaled back to original image space in __call__ function)
 
         Args:
-            pred: network prediction 
+            pred: network prediction
 
         Return:
             postprocessing result as a dict with keys:
-                polys (list): predicted polygons on the **transformed** (i.e. resized normally) image space, of shape (batch_size, num_polygons, num_points, 2). If `box_type` is 'quad', num_points=4. 
-                scores (np.ndarray): of shape (batch_size, num_polygons), confidene for each predicted text box on each input image 
+                polys (list): predicted polygons on the **transformed** (i.e. resized normally) image space, of shape (batch_size, num_polygons, num_points, 2). If `box_type` is 'quad', num_points=4.
+                scores (np.ndarray): of shape (batch_size, num_polygons), confidene for each predicted text box on each input image
 
         Notes:
-        - Cast `pred` to the type you need in implementation, since some used ops are from nn and prefer Tensor type, while others can be from numpy and prefer np.ndarray.
+        - Please cast `pred` to the type you need in your implementation. Some postprocesssing steps use ops from mindspore.nn and prefer Tensor type, while some steps prefer np.ndarray type required in other libraries.
+        - This function should **NOT round** the text box `polys` to integer in return, because they will be recaled (in __call__()) later. Rounding early will cause larger error in polygon rescaling and may degrade the evaluation performance slightly, especially on small datasets. Please keep the orginal float precision for the returned `polys`.
         '''
         raise NotImplementedError
 
-    @staticmethod
-    def _rescale_polygons(polygons: List[np.ndarray], shape_list: np.ndarray):
-        """
-        polygons (List[np.ndarray]): polygons for an image, shape [num_polygons, num_points, 2], value: xy coordinates for all polygon points
-        shape_list (np.ndarray): shape and scale info for the image, shape [4,], value: [src_h, src_w, scale_h, scale_w]
-        """
-        scale_w_h = shape_list[:1:-1]
-
-        #print('DEBUG: before rescale, poly 0: ', polygons[0], 'shape list: ', shape_list[0])
-        if isinstance(polygons, np.ndarray):
-            polygons = np.round(polygons / scale_w_h) 
-        else:
-            polygons = [np.round(poly / scale_w_h) for poly in polygons]
-
-        #print('DEBUG: After rescale, poly 0: ', polygons[0])
-
-        return polygons
-
-    def rescale(self, result: dict, shape_list: np.ndarray) -> dict:
-        """
-        rescale result back to orginal image shape
-
-        Args:
-            result (dict) with keys for the input data batch
-                polys (np.ndarray): polygons for a batch of images, shape [batch_size, num_polygons, num_points, 2].
-            shape_list (np.ndarray): image shape and scale info, shape [batch_size, 4]
-
-        Return:
-            rescaled result specified by rescale_field
-        """
-
-        for field in self._rescale_fields:
-            assert (
-                field in result
-            ), f"Invalid field {field}. Found fields in intermidate postprocess result are {list(result.keys())}"
-            for i, sample in enumerate(result[field]):
-                if len(sample) > 0:
-                    result[field][i] = self._rescale_polygons(sample, shape_list[i])
-
-        return result
 
     def __call__(
         self,
@@ -97,7 +59,7 @@ class DetBasePostprocess:
         **kwargs,
     ) -> dict:
         """
-        Execution entry for postprocessing, which postprocess network prediction on the transformed image space to get text boxes and then rescale them back to the original image space. 
+        Execution entry for postprocessing, which postprocess network prediction on the transformed image space to get text boxes and then rescale them back to the original image space.
 
         Args:
             pred (Union[Tensor, Tuple[Tensor], np.ndarray]): network prediction
@@ -105,8 +67,8 @@ class DetBasePostprocess:
 
         Returns:
             postprocessing result as a dict with keys:
-                polys (list): predicted polygons mapped on the **original** image space, of shape (batch_size, num_polygons, num_points, 2). If `box_type` is 'quad', num_points=4. 
-                scores (np.ndarray): of shape (batch_size, num_polygons), confidene for each predicted text box on each input image 
+                polys (list): predicted polygons mapped on the **original** image space, of shape (batch_size, num_polygons, num_points, 2). If `box_type` is 'quad', num_points=4.
+                scores (np.ndarray): of shape (batch_size, num_polygons), confidene for each predicted text box on each input image
         """
 
         # 1. Check input type. Covert shape_list to np.ndarray
@@ -137,4 +99,45 @@ class DetBasePostprocess:
 
         return result
 
+
+    @staticmethod
+    def _rescale_polygons(polygons: List[np.ndarray], shape_list: np.ndarray):
+        """
+        polygons (List[np.ndarray]): polygons for an image, shape [num_polygons, num_points, 2], value: xy coordinates for all polygon points
+        shape_list (np.ndarray): shape and scale info for the image, shape [4,], value: [src_h, src_w, scale_h, scale_w]
+        """
+        scale_w_h = shape_list[:1:-1]
+
+        #print('DEBUG: before rescale, poly 0: ', polygons[0], 'shape list: ', shape_list[0])
+        if isinstance(polygons, np.ndarray):
+            polygons = np.round(polygons / scale_w_h)
+        else:
+            polygons = [np.round(poly / scale_w_h) for poly in polygons]
+
+        #print('DEBUG: After rescale, poly 0: ', polygons[0])
+
+        return polygons
+
+    def rescale(self, result: dict, shape_list: np.ndarray) -> dict:
+        """
+        rescale result back to orginal image shape
+
+        Args:
+            result (dict) with keys for the input data batch
+                polys (np.ndarray): polygons for a batch of images, shape [batch_size, num_polygons, num_points, 2].
+            shape_list (np.ndarray): image shape and scale info, shape [batch_size, 4]
+
+        Return:
+            rescaled result specified by rescale_field
+        """
+
+        for field in self._rescale_fields:
+            assert (
+                field in result
+            ), f"Invalid field {field}. Found fields in intermidate postprocess result are {list(result.keys())}"
+            for i, sample in enumerate(result[field]):
+                if len(sample) > 0:
+                    result[field][i] = self._rescale_polygons(sample, shape_list[i])
+
+        return result
 

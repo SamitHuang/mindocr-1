@@ -158,13 +158,13 @@ class RandomScale:
                 if self.is_train:
                     data['polys'] *= scale
                 else:
-                    raise ValueError('Test time augmentation is not supported for detection. RandomScale should not be used in test time.')
+                    raise ValueError('Test time augmentation is not supported for detection currently. RandomScale should only be used for training.')
 
         return data
 
 class RandomColorAdjust:
     def __init__(self, brightness=32.0 / 255, saturation=0.5, **kwargs):
-        contrast  = kwargs.get('contrast', (1,1)) 
+        contrast  = kwargs.get('contrast', (1,1))
         hue = kwargs.get('hue', (0, 0))
         self._jitter = MSRandomColorAdjust(brightness=brightness, saturation=saturation, contrast=contrast, hue=hue)
         self._pil = ToPIL()

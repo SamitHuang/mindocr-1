@@ -32,7 +32,7 @@ class IaaAugment:
 
                 data['polys'] = np.array(new_polys) if isinstance(data['polys'], np.ndarray) else new_polys
             else:
-                raise ValueError('Test time augmentation is not supported for detection. IaaAugment should not be used in test time.')
+                raise ValueError('Test time augmentation is not supported for detection currently (due to transformed polygons can be not recoveried for evaluation). IaaAugment should only be used for training.')
 
         data['image'] = aug.augment_image(data['image'])
 

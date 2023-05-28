@@ -52,20 +52,18 @@ class DBPostprocess(DetBasePostprocess):
         self, pred: Union[Tensor, Tuple[Tensor], np.ndarray], **kwargs
     ) -> dict:
         """
-        Postprocess network prediction to get text boxes on the transformed image space (which will be rescaled back to original image space in __call__ function) 
+        Postprocess network prediction to get text boxes on the transformed image space (which will be rescaled back to original image space in __call__ function)
 
-		Args:
-			pred (Union[Tensor, Tuple[Tensor], np.ndarray]): network prediction consists of 
+        Args:
+			pred (Union[Tensor, Tuple[Tensor], np.ndarray]): network prediction consists of
 				binary: text region segmentation map, with shape (N, 1, H, W)
 				thresh: [if exists] threshold prediction with shape (N, 1, H, W) (optional)
 				thresh_binary: [if exists] binarized with threshold, (N, 1, H, W) (optional)
 
 		Return:
             postprocessing result as a dict with keys:
-                polys (list): predicted polygons on the **transformed** (i.e. resized normally) image space, of shape (batch_size, num_polygons, num_points, 2). If `box_type` is 'quad', num_points=4. 
-                scores (np.ndarray): of shape (batch_size, num_polygons), confidene for each predicted text box on each input image 
-
-
+                polys (list): predicted polygons on the **transformed** (i.e. resized normally) image space, of shape (batch_size, num_polygons, num_points, 2). If `box_type` is 'quad', num_points=4.
+                scores (np.ndarray): of shape (batch_size, num_polygons), confidene for each predicted text box on each input image
         """
         if isinstance(pred, tuple):
             pred = pred[self._names[self._name]]
