@@ -8,13 +8,15 @@
 
 3. Please write comments for the __call__ function to clarify the required/modified/added keys in the data dict.
 
+4. Add kwargs in the class init function for extension, which is used to parse global config, such as is_train. 
+
 ```python
 class ToCHWImage(object):
     """ convert hwc image to chw image
     """
 
-    def __init__(self, **kwargs):
-        pass
+    def __init__(self, channel, **kwargs):
+        self.is_train = kwargs.get('is_train', True)
 
     def __call__(self, data: dict):
         '''
