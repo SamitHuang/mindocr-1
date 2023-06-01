@@ -248,7 +248,7 @@ def resize_norm_img(img,
         if norm_before_pad:
             resized_image = (resized_image - mean) / std
 
-        padded_img = np.zeros((imgH, imgW, c), dtype=np.uint8)
+        padded_img = np.zeros((imgH, imgW, c), dtype=np.float32)
         padded_img[:, 0:resized_w, :] = resized_image
 
         if not norm_before_pad:
@@ -293,7 +293,7 @@ def resize_norm_img_chinese(img,
     if norm_before_pad:
             resized_image = (resized_image - mean) / std
 
-    padded_img = np.zeros((imgH, imgW, c), dtype=np.uint8)
+    padded_img = np.zeros((imgH, imgW, c), dtype=np.float32)
     padded_img[:, 0:resized_w, :] = resized_image
     
     if not norm_before_pad:
