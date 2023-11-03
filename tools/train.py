@@ -38,6 +38,27 @@ from mindocr.utils.train_step_wrapper import TrainOneStepWrapper
 logger = logging.getLogger("mindocr.train")
 
 
+class OverflowMonitor(ms.Callback):
+    def on_train_step_end(self, run_context):
+        cb_params = run_context.original_args()
+        cur_epoch_num = cb_params.get("cur_epoch_num", 1)
+        cur_step_in_epoch = (cb_params.cur_step_num - 1) % cb_params.batch_num + 1
+        overflow = cb_params.net_outputs[1]
+        if overflow:
+            print(f"overflow detected in epoch {cur_epoch_num} step {cur_step_in_epoch}")
+        return super().step_end(run_context)
+
+    def on_train_epoch_end(self, run_context):
+        cb_params = run_context.original_args()
+        cur_epoch_num = cb_params.get("cur_epoch_num", 1)
+        cur_step_in_epoch = (cb_params.cur_step_num - 1) % cb_params.batch_num + 1
+        overflow = cb_params.net_outputs[1]
+        if overflow:
+            print(f"overflow detected in epoch {cur_epoch_num} end.")
+        return super().epoch_end(run_context)
+
+
+
 def main(cfg):
     # init env
     ms.set_context(mode=cfg.system.mode)
@@ -195,6 +216,8 @@ def main(cfg):
         ckpt_save_policy=cfg.system.get("ckpt_save_policy", "top_k"),
         ckpt_max_keep=cfg.system.get("ckpt_max_keep", 10),
         start_epoch=start_epoch,
+        lr=lr_scheduler,
+        optimizer=optimizer,
     )
 
     # save args used for training
@@ -243,7 +266,7 @@ def main(cfg):
     model.train(
         cfg.scheduler.num_epochs,
         loader_train,
-        callbacks=[eval_cb],
+        callbacks=[eval_cb, OverflowMonitor()],
         dataset_sink_mode=cfg.train.dataset_sink_mode,
         initial_epoch=start_epoch,
     )

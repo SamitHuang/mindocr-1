@@ -6,6 +6,8 @@ system:
   log_interval: 10
   val_while_train: True
   drop_overflow_update: False
+  val_interval: 5
+  val_start_epoch: 50
 
 model:
   type: det
@@ -50,8 +52,8 @@ scheduler:
   warmup_epochs: 3
 
 optimizer:
-  opt: SGD
-  filter_bias_and_bn: false
+  opt: momentum
+  filter_bias_and_bn: True
   momentum: 0.9
   weight_decay: 1.0e-4
 
@@ -65,10 +67,10 @@ loss_scaler:
 train:
   ckpt_save_dir: './tmp_det'
   dataset_sink_mode: True
-  gradient_accumulation_steps: 2
+  gradient_accumulation_steps: 1
   dataset:
     type: DetDataset
-    dataset_root: /data/ocr_datasets
+    dataset_root: /home/hyx/datasets
     data_dir: ic15/det/train/ch4_training_images
     label_file: ic15/det/train/det_gt.txt
     sample_ratio: 1.0
@@ -116,16 +118,16 @@ train:
 
   loader:
     shuffle: True
-    batch_size: 10
+    batch_size: 20
     drop_remainder: True
-    num_workers: 8
+    num_workers: 12
 
 eval:
   ckpt_load_path: tmp_det/best.ckpt
   dataset_sink_mode: False
   dataset:
     type: DetDataset
-    dataset_root: /data/ocr_datasets
+    dataset_root: /home/hyx/datasets
     data_dir: ic15/det/test/ch4_test_images
     label_file: ic15/det/test/det_gt.txt
     sample_ratio: 1.0
@@ -160,8 +162,8 @@ predict:
   ckpt_load_path: tmp_det/best.ckpt
   dataset_sink_mode: False
   dataset:
+    dataset_root: /home/hyx/datasets
     type: PredictDataset
-    dataset_root: path/to/dataset_root
     data_dir: ic15/det/test/ch4_test_images
 #    label_file: test.txt
     sample_ratio: 1.0

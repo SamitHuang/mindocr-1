@@ -7,6 +7,7 @@ from typing import Optional
 from mindspore import load_checkpoint, load_param_into_net, nn
 
 from .adamw import AdamW
+from .adamw_fp32 import FP32StateAdamWeightDecay
 from .adan import Adan
 from .lion import Lion
 from .nadam import NAdam
@@ -125,13 +126,24 @@ def create_optimizer(
         )
     elif opt == "adamw":
         opt_args = _collect_args(kwargs, AdamW)
+        #optimizer = nn.AdamWeightDecay(
         optimizer = AdamW(
             params=params,
+            loss_scale=loss_scale,
             learning_rate=lr,
             weight_decay=weight_decay,
-            loss_scale=loss_scale,
             **opt_args,
         )
+    elif opt == "adamw_fp32":
+        opt_args = _collect_args(kwargs, FP32StateAdamWeightDecay)
+        optimizer = FP32StateAdamWeightDecay(
+            params=params,
+            #loss_scale=loss_scale,
+            learning_rate=lr,
+            weight_decay=weight_decay,
+            **opt_args,
+        )
+
     elif opt == "lion":
         opt_args = _collect_args(kwargs, Lion)
         optimizer = Lion(

@@ -50,6 +50,8 @@ class EvalSaveCallback(Callback):
         ckpt_save_policy="top_k",
         ckpt_max_keep=10,
         start_epoch=0,
+        lr=None,
+        optimizer=None,
     ):
         self.rank_id = rank_id
         self.is_main_device = rank_id in [0, None]
@@ -60,6 +62,8 @@ class EvalSaveCallback(Callback):
         self.val_start_epoch = val_start_epoch
         self.log_interval = log_interval
         self.batch_size = batch_size
+        self.lr = lr
+        self.optimizer = optimizer
         if self.loader_eval is not None:
             self.net_evaluator = Evaluator(
                 network,
@@ -177,8 +181,24 @@ class EvalSaveCallback(Callback):
         epoch_time = time.time() - self.epoch_start_time
         per_step_time = epoch_time * 1000 / cb_params.batch_num
         fps = 1000 * self.batch_size / per_step_time
+        
+        # its only for ms2.2, get_lr() will not increase global step since ms2.2. 
+        # cur_lr = cb_params.train_network.optimizer.get_lr().asnumpy()
+        '''
+        opt = cb_params.train_network.optimizer
+        cur_lr = fetch_optimizer_lr(opt)  # get lr or group lr without updating global step
+        cur_lr = (
+            cur_lr.asnumpy().squeeze()
+            if not isinstance(cur_lr, (Tuple, List))
+            else [lr.asnumpy().squeeze() for lr in cur_lr]
+        )
+        cur_lr = float(cur_lr) if not isinstance(cur_lr, (Tuple, List)) else [float(lr) for lr in cur_lr]
+        '''
+        cur_step = int(self.optimizer.global_step.asnumpy())
+        cur_lr = self.lr[cur_step-1]
+
         msg = (
-            f"epoch: [{cur_epoch}/{cb_params.epoch_num+self.start_epoch}], loss: {train_loss:.6f}, "
+            f"epoch: [{cur_epoch}/{cb_params.epoch_num+self.start_epoch}], loss: {train_loss:.6f}, lr: {cur_lr:.6f}, "
             f"epoch time: {epoch_time:.3f} s, per step time: {per_step_time:.3f} ms, fps per card: {fps:.2f} img/s"
         )
         _logger.info(msg)
