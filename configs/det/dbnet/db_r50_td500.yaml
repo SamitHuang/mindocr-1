@@ -6,7 +6,7 @@ system:
   log_interval: 10
   val_while_train: True
   drop_overflow_update: False
-  val_interval: 5
+  val_interval: 2
 
 model:
   type: det
@@ -46,32 +46,34 @@ loss:
 
 scheduler:
   scheduler: polynomial_decay
-  lr: 0.007
-  num_epochs: 1200
+  lr: 0.002 # 0.002 
+  num_epochs: 500
   decay_rate: 0.9
-  warmup_epochs: 3
+  warmup_epochs: 20
 
 optimizer:
-  opt: SGD
-  filter_bias_and_bn: false
+  opt: momentum
+  filter_bias_and_bn: True
   momentum: 0.9
   weight_decay: 1.0e-4
 
 # only used for mixed precision training
 loss_scaler:
-  type: dynamic
-  loss_scale: 512
-  scale_factor: 2
-  scale_window: 1000
+  type: static
+  loss_scale: 1.
 
 train:
+  clip_grad: True
+  clip_norm: 0.5
+  #ema: True
+  #ema_decay: 0.9999
   ckpt_save_dir: './tmp_det'
   dataset_sink_mode: True
   dataset:
     type: DetDataset
-    dataset_root: /data/ocr_datasets
-    data_dir: TD500_TR400/train_images
-    label_file: TD500_TR400/train_gt_labels.txt
+    dataset_root: /home/hyx/datasets
+    data_dir: TD_TR
+    label_file: TD_TR/train_gt_labels.txt
     sample_ratio: 1.0
     transform_pipeline:
       - DecodeImage:
@@ -126,9 +128,9 @@ eval:
   dataset_sink_mode: False
   dataset:
     type: DetDataset
-    dataset_root: /data/ocr_datasets
-    data_dir: MSRA-TD500/test
-    label_file: MSRA-TD500/test_det_gt.txt
+    dataset_root: /home/hyx/datasets
+    data_dir: TD_TR
+    label_file: TD_TR/test_gt_labels.txt
     sample_ratio: 1.0
     transform_pipeline:
       - DecodeImage:
