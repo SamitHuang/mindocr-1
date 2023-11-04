@@ -6,7 +6,7 @@ system:
   log_interval: 10
   val_while_train: True
   drop_overflow_update: False
-  val_start_epoch: 5
+  val_start_epoch: 30
   val_interval: 5
 
 model:
@@ -120,7 +120,7 @@ train:
     shuffle: True
     batch_size: 20
     drop_remainder: True
-    num_workers: 8
+    num_workers: 16
 
 eval:
   ckpt_load_path: tmp_det/best.ckpt
