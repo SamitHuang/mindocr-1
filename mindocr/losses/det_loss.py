@@ -58,10 +58,21 @@ class DBLoss(nn.LossBase):
         Return:
             Tensor: weighted loss value.
         """
+        gt = gt.astype(ms.float32)
+        gt_mask = gt_mask.astype(ms.float32)
+        thresh_map = thresh_map.astype(ms.float32)
+        thresh_mask = thresh_mask.astype(ms.float32)
+
         if isinstance(pred, ms.Tensor):
+            pred = pred.astype(ms.float32)
             loss = self.bce_loss(pred, gt, gt_mask)
         else:
             binary, thresh, thresh_binary = pred
+
+            binary = binary.astype(ms.float32)
+            thresh = thresh.astype(ms.float32)
+            thresh_binary = thresh_binary.astype(ms.float32)
+
             bce_loss_output = self.bce_loss(binary, gt, gt_mask)
             l1_loss = self.l1_loss(thresh, thresh_map, thresh_mask)
             dice_loss = self.dice_loss(thresh_binary, gt, gt_mask)
