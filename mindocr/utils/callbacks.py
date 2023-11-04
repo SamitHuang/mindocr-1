@@ -5,7 +5,7 @@ from typing import List, Tuple
 
 import mindspore as ms
 from mindspore import save_checkpoint
-from mindspore.train.callback._callback import Callback, _handle_loss
+from mindspore.train.callback._callback import Callback, _handle_loss, set_cur_net
 
 from .checkpoint import CheckpointManager
 from .evaluator import Evaluator
@@ -206,11 +206,17 @@ class EvalSaveCallback(Callback):
 
         # save best models and results using card 0
         if self.is_main_device:
+		    # For ms0907: Delete when remove MS_ENABLE_REF_MODE env.
+            if ms.context.get_context("enable_ge"):
+                set_cur_net(cb_params.train_network)
+                cb_params.train_network.exec_checkpoint_graph()
+
             # save best models
             if (self.main_indicator == "train_loss" and perf < self.best_perf) or (
                 self.main_indicator != "train_loss" and eval_done and perf > self.best_perf
             ):  # when val_while_train enabled, only find best checkpoint after eval done.
                 self.best_perf = perf
+
                 # ema weight will be saved if enabled.
                 save_checkpoint(self.network, os.path.join(self.ckpt_save_dir, "best.ckpt"))
 

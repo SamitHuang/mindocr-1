@@ -1,6 +1,7 @@
 from typing import Optional
 
 from packaging import version
+import numpy as np
 
 import mindspore as ms
 import mindspore.nn as nn
@@ -16,12 +17,14 @@ class AverageMeter:
         self.reset()
 
     def reset(self) -> None:
-        self.val = Tensor(0.0, dtype=ms.float32)
-        self.avg = Tensor(0.0, dtype=ms.float32)
-        self.sum = Tensor(0.0, dtype=ms.float32)
-        self.count = Tensor(0.0, dtype=ms.float32)
+        self.val = np.array(0.0, dtype=np.float32)
+        self.avg = np.array(0.0, dtype=np.float32)
+        self.sum = np.array(0.0, dtype=np.float32)
+        self.count = np.array(0.0, dtype=np.float32)
 
-    def update(self, val: Tensor, n: int = 1) -> None:
+    def update(self, val, n: int = 1) -> None:
+        if isinstance(val, ms.Tensor):
+            val = val.asnumpy()
         self.val = val
         self.sum += val * n
         self.count += n

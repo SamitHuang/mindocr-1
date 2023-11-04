@@ -1,8 +1,10 @@
 """Train step wrapper supporting setting drop overflow update, ema etc"""
+from packaging import version
 import mindspore as ms
 import mindspore.context as context
 from mindspore import Parameter, Tensor, nn, ops
 from mindspore.common import RowTensor, mutable
+from mindspore.common import dtype as mstype
 from mindspore.ops import composite as C
 from mindspore.ops import functional as F
 from mindspore.ops import operations as P
@@ -92,10 +94,7 @@ class TrainOneStepWrapper(nn.TrainOneStepWithLossScaleCell):
         self.map = ops.Map()
         self.partial = ops.Partial()
 
-    @jit
-    def down_scale_grads(self, scaling_sens, grads):
-        grads = self.hyper_map(F.partial(_grad_scale, scaling_sens * self.grad_accu_steps), grads)
-        return grads
+        self.skip_start_overflow_check = version.parse(ms.__version__) >= version.parse("2.1")
 
     def construct(self, *inputs):
         # compute loss
@@ -104,10 +103,13 @@ class TrainOneStepWrapper(nn.TrainOneStepWithLossScaleCell):
         scaling_sens = self.scale_sense
 
         # check loss overflow
-        if not self.is_cpu_device:
-            status, scaling_sens = self.start_overflow_check(loss, scaling_sens)
+        if self.skip_start_overflow_check:
+            status = Tensor([0] * 8, ms.int32)
         else:
-            status = None
+            if not self.is_cpu_device:
+                status, scaling_sens = self.start_overflow_check(loss, scaling_sens)
+            else:
+                status = None
 
         scaling_sens_filled = C.ones_like(loss) * F.cast(scaling_sens, F.dtype(loss))  # loss scale value
 
@@ -116,8 +118,7 @@ class TrainOneStepWrapper(nn.TrainOneStepWithLossScaleCell):
 
         # 2. down-scale gradients by loss_scale. grads = grads / scaling_sense  / grad_accu_steps
         # also divide gradients by accumulation steps to avoid taking mean of  the accumulated gradients later
-        grads = mutable(grads)
-        grads = self.down_scale_grads(scaling_sens, grads)
+        grads = self.hyper_map(F.partial(_grad_scale, scaling_sens * self.grad_accu_steps), grads)
 
         # 3. check gradient overflow
         if not self.is_cpu_device:
@@ -134,7 +135,7 @@ class TrainOneStepWrapper(nn.TrainOneStepWithLossScaleCell):
                 # self.accumulated_grads += grads
                 loss = F.depend(loss, self.map(self.partial(ops.assign_add), self.accumulated_grads, grads))
                 # self.cur_accu_step += 1
-                loss = F.depend(loss, ops.assign_add(self.cur_accu_step, Tensor(1, ms.int32)))
+                loss = F.depend(loss, ops.assign_add(self.cur_accu_step, Tensor(1, mstype.int32)))
 
                 if self.cur_accu_step % self.grad_accu_steps == 0:
                     # 5. gradient reduction on distributed GPUs/NPUs
