@@ -2,9 +2,9 @@ export MS_ASCEND_CHECK_OVERFLOW_MODE="INFNAN_MODE" # debugging
 export DEVICE_ID=$1
 
 #task_name=train_db_r50_1p_momentum # rewrite
-#yaml_file=configs/det/dbnet/db_r50_icdar15.yaml # rewrite
-task_name=train_db_r50_tdtr_updateTrainer_infnan_overflowDropUpdate #rewrite
-yaml_file=configs/det/dbnet/db_r50_td500.yaml # rewrite
+yaml_file=configs/det/dbnet/db_r50_icdar15.yaml # rewrite
+task_name=train_db_r50_ic15_fusionAllOFF_infnan_mzLoss  #rewrite
+#yaml_file=configs/det/dbnet/db_r50_td500.yaml # rewrite
 output_path=outputs
 
 rm -rf ${output_path:?}/${task_name:?}

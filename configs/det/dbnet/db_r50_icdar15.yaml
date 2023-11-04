@@ -5,9 +5,9 @@ system:
   seed: 42
   log_interval: 10
   val_while_train: True
-  drop_overflow_update: False
+  drop_overflow_update: True # changed
   val_interval: 5
-  val_start_epoch: 50
+  val_start_epoch: 5
 
 model:
   type: det
@@ -38,7 +38,7 @@ metric:
   main_indicator: f-score
 
 loss:
-  name: DBLoss
+  name: L1BalanceCELoss  #DBLoss
   eps: 1.0e-6
   l1_scale: 10
   bce_scale: 5
@@ -46,25 +46,27 @@ loss:
 
 scheduler:
   scheduler: polynomial_decay
-  lr: 0.007
+  lr: 0.007 # changed
   num_epochs: 1200
   decay_rate: 0.9
-  warmup_epochs: 3
+  warmup_epochs: 100
 
 optimizer:
-  opt: momentum
+  opt: momentum 
   filter_bias_and_bn: True
   momentum: 0.9
   weight_decay: 1.0e-4
 
 # only used for mixed precision training
 loss_scaler:
-  type: dynamic
-  loss_scale: 512
+  type: static # changed
+  loss_scale: 1. 
   scale_factor: 2
   scale_window: 1000
 
 train:
+  # clip_grad: True # changed
+  # clip_norm: 5.
   ckpt_save_dir: './tmp_det'
   dataset_sink_mode: True
   gradient_accumulation_steps: 1
@@ -120,7 +122,7 @@ train:
     shuffle: True
     batch_size: 20
     drop_remainder: True
-    num_workers: 12
+    num_workers: 16
 
 eval:
   ckpt_load_path: tmp_det/best.ckpt

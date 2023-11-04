@@ -2,6 +2,7 @@ __all__ = ["build_loss"]
 
 supported_losses = [
     "DBLoss",
+    "L1BalanceCELoss",
     "CTCLoss",
     "AttentionLoss",
     "PSEDiceLoss",
@@ -16,6 +17,7 @@ supported_losses = [
 from .abinet_loss import ABINetLoss
 from .cls_loss import CrossEntropySmooth
 from .det_loss import DBLoss, EASTLoss, FCELoss, PSEDiceLoss
+from .db_loss_mz import L1BalanceCELoss 
 from .rec_loss import AttentionLoss, CTCLoss, SARLoss, VisionLANLoss
 
 
