@@ -130,7 +130,7 @@ class EvalSaveCallback(Callback):
             cur_lr = float(cur_lr) if not isinstance(cur_lr, (Tuple, List)) else [float(lr) for lr in cur_lr]
             per_step_time = (time.time() - self.step_start_time) * 1000 / self.log_interval
             fps = self.batch_size * 1000 / per_step_time
-            loss = self._loss_avg_meter.val.asnumpy()
+            loss = self._loss_avg_meter.val
             if isinstance(cur_lr, List):
                 cur_lr = set(cur_lr)
                 cur_lr = cur_lr.pop()  # if group lr, get the first lr
@@ -166,7 +166,7 @@ class EvalSaveCallback(Callback):
         cb_params = run_context.original_args()
         cur_epoch = cb_params.cur_epoch_num
         train_time = time.time() - self.epoch_start_time
-        train_loss = self._loss_avg_meter.avg.asnumpy()
+        train_loss = self._loss_avg_meter.avg
 
         data_sink_mode = cb_params.dataset_sink_mode
         if data_sink_mode:

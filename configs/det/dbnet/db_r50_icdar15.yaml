@@ -6,6 +6,8 @@ system:
   log_interval: 10
   val_while_train: True
   drop_overflow_update: False
+  val_start_epoch: 5
+  val_interval: 5
 
 model:
   type: det
@@ -58,7 +60,7 @@ optimizer:
 # only used for mixed precision training
 loss_scaler:
   type: dynamic
-  loss_scale: 512
+  loss_scale: 65536.
   scale_factor: 2
   scale_window: 1000
 

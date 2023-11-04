@@ -81,7 +81,8 @@ def main(cfg):
                 f"Standalone training. Device id: {device_id}, "
                 f"specified by system.device_id in yaml config file or is default value 0."
             )
-
+    ms.set_context(ascend_config={"precision_mode": "allow_fp32_to_fp16"}) # for ms0907
+    # ms.set_context(ascend_config={'atomic_clean_policy': 0})
     set_seed(cfg.system.seed)
 
     # create dataset
@@ -108,6 +109,10 @@ def main(cfg):
     # create model
     amp_level = cfg.system.get("amp_level", "O0")
     network = build_model(cfg.model, ckpt_load_path=cfg.model.pop("pretrained", None), amp_level=amp_level)
+    
+    # TODO: temp debug
+    # network = network.to_float(ms.float32)
+
     num_params = sum([param.size for param in network.get_parameters()])
     num_trainable_params = sum([param.size for param in network.trainable_params()])
 
