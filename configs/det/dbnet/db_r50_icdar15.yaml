@@ -5,8 +5,8 @@ system:
   seed: 42
   log_interval: 10
   val_while_train: True
-  drop_overflow_update: False
-  val_start_epoch: 30
+  drop_overflow_update: False # set False if non-INFNAN and INFNAN
+  val_start_epoch: 50
   val_interval: 2
 
 model:
@@ -59,8 +59,8 @@ optimizer:
 
 # only used for mixed precision training
 loss_scaler:
-  type: dynamic
-  loss_scale: 65536. # 1048576. # 65536.
+  type: dynamic # static for INFAN,  dynamic for non-INFNAN
+  loss_scale: 2.e20 # 4096 for INFNAN, 2.e20  for non-INFNAN
   scale_factor: 2
   scale_window: 1000
 
@@ -70,7 +70,7 @@ train:
   gradient_accumulation_steps: 1
   dataset:
     type: DetDataset
-    dataset_root: /home/docker_home/lhy/datasets
+    dataset_root: /home/hyx/datasets
     data_dir: ic15/det/train/ch4_training_images
     label_file: ic15/det/train/det_gt.txt
     sample_ratio: 1.0
@@ -127,7 +127,7 @@ eval:
   dataset_sink_mode: False
   dataset:
     type: DetDataset
-    dataset_root: /home/docker_home/lhy/datasets
+    dataset_root: /home/hyx/datasets
     data_dir: ic15/det/test/ch4_test_images
     label_file: ic15/det/test/det_gt.txt
     sample_ratio: 1.0
