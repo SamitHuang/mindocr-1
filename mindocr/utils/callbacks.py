@@ -207,9 +207,11 @@ class EvalSaveCallback(Callback):
         # save best models and results using card 0
         if self.is_main_device:
 		    # For ms0907: Delete when remove MS_ENABLE_REF_MODE env.
+            '''
             if ms.context.get_context("enable_ge"):
                 set_cur_net(cb_params.train_network)
                 cb_params.train_network.exec_checkpoint_graph()
+            '''
 
             # save best models
             if (self.main_indicator == "train_loss" and perf < self.best_perf) or (
