@@ -7,7 +7,7 @@ system:
   val_while_train: True
   drop_overflow_update: False
   val_start_epoch: 30
-  val_interval: 5
+  val_interval: 2
 
 model:
   type: det
@@ -60,7 +60,7 @@ optimizer:
 # only used for mixed precision training
 loss_scaler:
   type: dynamic
-  loss_scale: 65536.
+  loss_scale: 65536. # 1048576. # 65536.
   scale_factor: 2
   scale_window: 1000
 
@@ -70,7 +70,7 @@ train:
   gradient_accumulation_steps: 1
   dataset:
     type: DetDataset
-    dataset_root: /home/ma-user/datasets
+    dataset_root: /home/docker_home/lhy/datasets
     data_dir: ic15/det/train/ch4_training_images
     label_file: ic15/det/train/det_gt.txt
     sample_ratio: 1.0
@@ -127,7 +127,7 @@ eval:
   dataset_sink_mode: False
   dataset:
     type: DetDataset
-    dataset_root: /home/ma-user/datasets
+    dataset_root: /home/docker_home/lhy/datasets
     data_dir: ic15/det/test/ch4_test_images
     label_file: ic15/det/test/det_gt.txt
     sample_ratio: 1.0
@@ -156,7 +156,7 @@ eval:
     shuffle: False
     batch_size: 1 # TODO: due to dynamic shape of polygons (num of boxes varies), BS has to be 1
     drop_remainder: False
-    num_workers: 2
+    num_workers: 4
 
 predict:
   ckpt_load_path: tmp_det/best.ckpt
