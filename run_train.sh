@@ -1,9 +1,9 @@
-#export MS_ASCEND_CHECK_OVERFLOW_MODE="INFNAN_MODE" # debugging
-export MS_ASCEND_CHECK_OVERFLOW_MODE=1  # set to avoid INFNAN dy default
+export MS_ASCEND_CHECK_OVERFLOW_MODE="INFNAN_MODE" # debuggin
+#export MS_ASCEND_CHECK_OVERFLOW_MODE=1  # set to avoid INFNAN dy default
 export DEVICE_ID=$1
 
-yaml_file=configs/det/dbnet/db_r50_icdar15.yaml # rewrite
-task_name=train_db_r50_ic15_lsDyn2e20 #rewrite
+yaml_file=configs/det/dbnet/db++_r50_icdar15.yaml # rewrite
+task_name=train_db++_r50_ic15_dynamic1024_ovfDropUpdate_e2000 #rewrite
 output_path=outputs
 
 rm -rf ${output_path:?}/${task_name:?}
